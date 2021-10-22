@@ -1,0 +1,78 @@
+*,
+:after,
+:before {
+  box-sizing: border-box;
+}
+
+body,
+html {
+  height: 100%;
+  margin: 0;
+}
+
+#app {
+  font-family: 'Roboto', sans-serif;
+  height: 100%;
+  text-align: left;
+}
+
+.page__wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+main {
+  flex: 1 0 auto;
+  overflow: hidden;
+}
+footer {
+  flex: 0 0 auto;
+}
+
+ul[role='list'],
+ol[role='list'] {
+  list-style: none !important;
+
+  li:before {
+    display: none !important;
+  }
+}
+
+.h1, h1, .h2, h2, .h3, h3, .h4, h4, .h5, h5, .h6, h6, p {
+  margin: 0;
+}
+
+a {
+  display: block;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+input, select, textarea {
+  border: none;
+  outline: none;
+}
+
+textarea {
+  resize: none;
+}
+
+select {
+  cursor: pointer;
+}
+
+ol, ul {
+  margin: 0;
+  padding: 0;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 0; 
+  margin: 0;
+}
+

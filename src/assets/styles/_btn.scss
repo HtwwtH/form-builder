@@ -1,0 +1,13 @@
+.btn {
+  border-radius: 5px;
+  &--blue {
+    background: $blue;
+    color: $white;
+  }
+
+  &--default {
+    padding: 14px 20px;
+    font-size: 20px;
+    line-height: 24px;
+  }
+}
