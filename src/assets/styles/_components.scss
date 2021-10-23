@@ -2,3 +2,86 @@
   max-width: 1040px;
   margin: 0 auto;
 }
+
+.asterisk {
+  color: $darkRed;
+  margin-right: 4px;
+}
+
+.field {
+  width: 100%;
+  margin-bottom: 20px;
+
+  label {
+    display: block;
+    font-size: 16px;
+    line-height: 22px;
+    color: $dark;
+  }
+  input, select {
+    width: 100%;
+    display: block;
+    padding: 12px 15px;
+    border: 1px solid rgba(23, 23, 25, 0.2);
+    box-sizing: border-box;
+    border-radius: 5px;
+    color: $dark;
+    font-size: 20px;
+    line-height: 24px;
+
+    &::placeholder {
+      color: $dark;
+      opacity: 0.3;
+    }
+  }
+
+  input:focus {
+    border: 1px solid $blue;
+    background: $lightBlue;
+  }
+
+  select {
+    position: relative;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url('../images/icons/select-dropdown.svg'); 
+    background-repeat: no-repeat, repeat;
+    background-position: right .7em top 50%, 0 0;
+    background-size: .65em auto, 100%; 
+
+    &:required:invalid {
+      color: rgba(39, 39, 39, .3);
+    }
+
+    option {
+      font-size: 20px;
+      line-height: 48px;
+      color: $dark;
+      padding: 12px 14px;
+
+      &:hover, &:active {
+        background: $lightBlue;
+      }
+    }
+  }
+}
+
+.invalid {
+  label {
+    color: $red;
+  }
+  input, select {
+    border: 1px solid $red;
+    background: rgba(235, 87, 87, 0.1);
+    &::placeholder {
+      color: $red;
+      opacity: 0.6;
+    }
+  }
+  select {
+    &:required:invalid {
+      color: rgba(235, 87, 87, .6);
+    }
+  }
+}

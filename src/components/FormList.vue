@@ -16,14 +16,6 @@ import { Component, Vue } from "vue-property-decorator";
 import { namespace } from "vuex-class";
 const Form = namespace("Form");
 
-interface Schema {
-  id: number;
-  schema: {
-    name: string;
-    fields: [];
-  };
-}
-
 @Component
 export default class FormList extends Vue {
   @Form.Getter("getFormList")
@@ -42,7 +34,6 @@ export default class FormList extends Vue {
         console.log(error);
       });
   }
-
 }
 </script>
 

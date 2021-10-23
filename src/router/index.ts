@@ -27,6 +27,13 @@ const routes: Array<RouteConfig> = [
     meta: {
       header: true
     }
+  },
+  {
+    path: '/new-scheme',
+    component: () => import('../views/NewScheme.vue'),
+    meta: {
+      header: true
+    }
   }
 ]
 

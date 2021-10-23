@@ -1,15 +1,21 @@
 <template>
   <div class="scheme">
-    id {{ $route.params.id }}
+    <div class="scheme__wrapper">
+      id {{ $route.params.id }}
 
-    <h2 class="title">{{ shemeName }}</h2>
+      <h2 class="title">{{ schemeName }}</h2>
+
+      <div v-for="item in fields" :key="item.key">
+        <Field :field="item" />
+      </div>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import { namespace } from "vuex-class";
-import { Field } from "@/components/Field.vue";
+import Field from "@/components/Field.vue";
 const Form = namespace("Form");
 
 @Component({
@@ -24,7 +30,7 @@ export default class Scheme extends Vue {
   @Form.Action
   private fetchSingleForm!: (id: string) => Promise<any>;
 
-  get shemeName(): string {
+  get schemeName(): string {
     return this.getCurrentForm.schema.name;
   }
 
@@ -50,5 +56,10 @@ export default class Scheme extends Vue {
 
 .scheme {
   background: $white;
+  padding: 36px;
+}
+
+.scheme__wrapper {
+  width: 562px;
 }
 </style>

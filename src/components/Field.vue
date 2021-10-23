@@ -1,30 +1,44 @@
 <template>
   <div class="field">
-    <label for=""></label>
-    <input type="">
+    field
+    {{ field }}
+    <label for="key"
+      ><span v-if="required" class="asterisk">*</span>{{ label }}</label
+    >
+    <input
+      :id="key"
+      :type="type"
+      :placeholder="'Введите ' + label"
+      :required="required"
+    />
   </div>
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-export default Vue.extend({
-  
-})
+import { Component, Vue, Prop } from "vue-property-decorator";
+
+@Component
+export default class Field extends Vue {
+  @Prop({}) field!: any;
+
+  get label(): string {
+    return this.field.label;
+  }
+
+  get key(): string {
+    return this.field.key;
+  }
+
+  get type(): string {
+    return this.field.type;
+  }
+
+  get required(): boolean {
+    return this.field.validation.required;
+  }
+}
 </script>
 
 <style scoped lang="scss">
 @import "@/assets/styles/_vars.scss";
-
-.form-list {
-  background: $white;
-}
-
-.form-list__item {
-  color: $black;
-  font-weight: 500;
-  font-size: 16px;
-  line-height: 20px;
-  padding: 13px 20px;
-  border-bottom: 1px solid $lightGray;
-}
 </style>

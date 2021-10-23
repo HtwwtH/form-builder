@@ -1,7 +1,8 @@
 <template>
-  <div class="scheme-page">
+  <div class="newscheme-page">
     <div class="container">
-      <Scheme />
+      <h2>Новая схема</h2>
+      <SchemeConstructor />
     </div>
   </div>
 </template>
@@ -9,15 +10,15 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import { namespace } from "vuex-class";
-import Scheme from "@/components/Scheme.vue";
+import SchemeConstructor from "@/components/SchemeConstructor.vue";
 const Auth = namespace("Auth");
 
 @Component({
   components: {
-    Scheme,
+    SchemeConstructor,
   },
 })
-export default class SchemePage extends Vue {
+export default class NewSchemePage extends Vue {
   @Auth.State("user")
   private currentUser;
 
@@ -30,7 +31,10 @@ export default class SchemePage extends Vue {
 </script>
 
 <style lang="scss">
-.scheme-page {
-  padding-top: 36px;
+.newscheme-page {
+  padding-top: 40px;
+  h2 {
+    margin-bottom: 20px;
+  }
 }
 </style>
