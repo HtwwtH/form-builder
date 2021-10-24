@@ -2,7 +2,7 @@
   <div class="newscheme-page">
     <div class="container">
       <h2>Новая схема</h2>
-      <SchemeConstructor />
+      <SchemePropertyList />
     </div>
   </div>
 </template>
@@ -10,12 +10,12 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import { namespace } from "vuex-class";
-import SchemeConstructor from "@/components/SchemeConstructor.vue";
+import SchemePropertyList from "@/components/SchemePropertyList.vue";
 const Auth = namespace("Auth");
 
 @Component({
   components: {
-    SchemeConstructor,
+    SchemePropertyList,
   },
 })
 export default class NewSchemePage extends Vue {
@@ -33,6 +33,7 @@ export default class NewSchemePage extends Vue {
 <style lang="scss">
 .newscheme-page {
   padding-top: 40px;
+  padding-bottom: 100px;
   h2 {
     margin-bottom: 20px;
   }

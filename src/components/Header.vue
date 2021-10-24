@@ -10,7 +10,7 @@
             <router-link to="/profile">Мои схемы</router-link>
           </li>
           <li>
-            <router-link to="#">Создать схему</router-link>
+            <router-link to="/new-scheme">Создать схему</router-link>
           </li>
         </ul>
       </nav>

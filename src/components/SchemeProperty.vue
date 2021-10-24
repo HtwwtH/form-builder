@@ -1,46 +1,44 @@
 <template>
   <div class="">
-    <div class="property__content">
+    <form @submit.prevent="submit" class="property__content">
       <div class="scheme-property">
-        <h4>Свойство 1: {{ field.label }}</h4>
-        <div class="field" v-bind:class="{ invalid: keyFieldError }">
+        <h4>Свойство {{ position }}: {{ labelField }}</h4>
+        <div class="field" :class="{ invalid: $v.keyField.$error }">
           <label for="keyInput"
             ><span class="asterisk">*</span>Ключ свойства</label
           >
           <input
             id="keyInput"
-            v-model="field.key"
+            v-model="keyField"
             type="text"
             placeholder="Укажите ключ свойства"
             required
-            @click="keyFieldError = false"
+            v-model.trim="$v.keyField.$model"
           />
         </div>
-        <div class="field" v-bind:class="{ invalid: labelFieldError }">
+        <div class="field" :class="{ invalid: $v.labelField.$error }">
           <label for="labelInput"
             ><span class="asterisk">*</span>Название свойства</label
           >
           <input
             id="labelInput"
-            v-model="field.label"
+            v-model="labelField"
             type="text"
             placeholder="Укажите название свойства"
             required
-            @click="labelFieldError = false"
           />
         </div>
-        <div class="field" v-bind:class="{ invalid: typeFieldError }">
+        <div class="field" :class="{ invalid: $v.typeField.$error }">
           <label for="typeInput"
             ><span class="asterisk">*</span>Поле для отображения</label
           >
           <select
             id="typeInput"
             ref="typeInput"
-            v-model="field.type"
+            v-model="typeField"
             placeholder="Выберите поле для отображения"
             required
             @change="setValidity"
-            @click="typeFieldError = false"
           >
             <option value="" disabled selected hidden>
               Выберите поле для отображения
@@ -53,6 +51,8 @@
             <!-- <option>Выпадающий список</option> -->
           </select>
         </div>
+
+        <OptionsList />
       </div>
 
       <div v-if="validateVisible" class="scheme-validity">
@@ -60,7 +60,7 @@
 
         <div class="scheme-validity__toggle">
           <input
-            v-model="field.validation.required"
+            v-model="validation.required"
             type="checkbox"
             id="toggle-button"
             class="toggle-button"
@@ -69,17 +69,89 @@
             >Обязательно для заполнения</label
           >
         </div>
+
+        <div
+          v-if="
+            (typeLib[typeField] == 'string') |
+              (typeLib[typeField] == 'number') |
+              (typeLib[typeField] == 'password')
+          "
+          class="scheme-validity__range"
+        >
+          <div class="field">
+            <label
+              v-if="
+                (typeLib[typeField] == 'string') |
+                  (typeLib[typeField] == 'password')
+              "
+              for="minValInput"
+              >Мин. кол-во символов</label
+            >
+            <label v-else-if="typeLib[typeField] == 'number'" for="minValInput"
+              >Мин. значение</label
+            >
+            <input
+              id="minValInput"
+              v-model="minVal"
+              type="number"
+              placeholder=""
+            />
+          </div>
+          <div class="field">
+            <label
+              v-if="
+                (typeLib[typeField] == 'string') |
+                  (typeLib[typeField] == 'password')
+              "
+              for="maxValInput"
+              >Макс. кол-во символов</label
+            >
+            <label v-else-if="typeLib[typeField] == 'number'" for="maxValInput"
+              >Макс. значение</label
+            >
+            <input
+              id="maxValInput"
+              v-model="maxVal"
+              type="number"
+              placeholder=""
+            />
+          </div>
+        </div>
+
+        <div
+          v-if="
+            (typeLib[typeField] == 'string') |
+              (typeLib[typeField] == 'password')
+          "
+          class="scheme-validity__pattern"
+        >
+          <div class="field">
+            <label for="patternInput">Шаблон ввода</label>
+            <input
+              id="patternInput"
+              v-model="pattern"
+              type="text"
+              placeholder=""
+            />
+          </div>
+        </div>
       </div>
-    </div>
+    </form>
+
     <div class="property__buttons">
       <button
         @click="addNewProperty"
-        type="button"
+        type="submit"
         class="btn btn--default btn--transparent"
       >
         Добавить новое свойство
       </button>
-      <button type="button" class="btn btn--default btn--blue">
+      <button
+        type="button"
+        class="btn btn--default btn--blue"
+        :disabled="position == 1"
+        @click="saveNewScheme"
+      >
         Сохранить схему
       </button>
     </div>
@@ -87,7 +159,9 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue, Prop, Inject } from "vue-property-decorator";
+import { required } from "vuelidate/lib/validators";
+import OptionsList from "@/components/OptionsList.vue";
 
 interface Validity {
   required: boolean;
@@ -102,59 +176,93 @@ interface Field {
 }
 
 @Component({
-  components: {},
+  components: {
+    OptionsList,
+  },
+  validations: {
+    keyField: {
+      required,
+    },
+    labelField: {
+      required,
+    },
+    typeField: {
+      required,
+    },
+  },
 })
 export default class SchemeProperty extends Vue {
-  field: Field = {
-    key: "",
-    label: "",
-    type: "",
-    validation: {
-      required: false,
-    },
-  };
+  @Prop() position!: number;
+  @Inject() readonly typeLib;
+
   validateVisible = false;
-  keyFieldError = false;
-  labelFieldError = false;
-  typeFieldError = false;
+
+  keyField = "";
+  labelField = "";
+  typeField = "";
+  validation = {
+    required: false,
+  };
+  minVal = null;
+  maxVal = null;
+  pattern = "";
 
   setValidity(): void {
     console.log("setValidity");
     this.validateVisible = true;
   }
 
-  validate(): void {
-    console.log("validate");
-    if (!this.field.key) this.keyFieldError = true;
-    if (!this.field.label) this.labelFieldError = true;
-    if (!this.field.type) this.typeFieldError = true;
-  }
-
   addNewProperty(): void {
-    console.log("addNewProperty");
-    this.validate();
+    this.$v.$touch();
+    if (this.$v.$invalid) {
+      this.submitStatus = "ERROR";
+    } else {
+      this.createProperty();
+    }
   }
 
-  // @Form.Getter("getCurrentForm")
-  // getCurrentForm!: any;
-  // @Form.Action
-  // private fetchSingleForm!: (id: string) => Promise<any>;
-  // get schemeName(): string {
-  //   return this.getCurrentForm.schema.name;
-  // }
-  // get fields(): [] {
-  //   return this.getCurrentForm.schema.fields;
-  // }
-  // mounted(): void {
-  //   const id = this.$route.params.id;
-  //   this.fetchSingleForm(id)
-  //     .then(() => {
-  //       console.log("fetched form on mounted");
-  //     })
-  //     .catch((error) => {
-  //       console.log(error);
-  //     });
-  // }
+  getProperty(): Field {
+    let obj = {
+      key: this.keyField,
+      label: this.labelField,
+      type: this.typeLib[this.typeField],
+      validation: {
+        required: this.validation.required,
+      },
+    };
+    if (this.minVal) obj.validation.min = this.minVal;
+    if (this.maxVal) obj.validation.max = this.maxVal;
+    if (this.pattern) obj.validation.pattern = this.pattern;
+    if (this.typeLib[this.typeField] == "phone")
+      obj.validation.pattern = "+7|8 ([0-9]{3}) [0-9]{3}-[0-9]{2}-[0-9]{2}";
+    console.log(obj);
+    return obj;
+  }
+
+  clearProperty(): void {
+    this.keyField = "";
+    this.labelField = "";
+    this.typeField = "";
+    this.validation = {
+      required: false,
+    };
+    this.minVal = null;
+    this.maxVal = null;
+    this.pattern = "";
+    this.$v.$reset();
+  }
+
+  createProperty(): void {
+    let obj = this.getProperty();
+    this.clearProperty();
+    this.$emit("addToList", obj);
+  }
+
+  saveNewScheme(): void {
+    let obj = this.getProperty();
+    this.clearProperty();
+    this.$emit("saveScheme", obj);
+  }
 }
 </script>
 
@@ -173,6 +281,14 @@ export default class SchemeProperty extends Vue {
 
   h4 {
     margin-bottom: 20px;
+    position: relative;
+
+    &:before {
+      position: absolute;
+      left: -19px;
+      top: -4px;
+      content: url("../assets/images/icons/select-dropdown.svg");
+    }
   }
 }
 
@@ -206,6 +322,7 @@ export default class SchemeProperty extends Vue {
     appearance: none;
     transition: all 0.3s cubic-bezier(0.2, 0.85, 0.32, 1.2);
     margin-right: 20px;
+    margin-bottom: 30px;
   }
   .toggle-button::after {
     content: "";
@@ -236,5 +353,21 @@ export default class SchemeProperty extends Vue {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+// range
+.scheme-validity__range {
+  display: flex;
+  justify-content: space-between;
+
+  .field {
+    width: calc(50% - 22px);
+    margin-bottom: 18px;
+  }
+}
+
+// pattern
+.scheme-validity__pattern {
+  width: 100%;
 }
 </style>

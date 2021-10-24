@@ -25,6 +25,18 @@ class FormService {
         return Promise.reject(error);
       });
   }
+
+  async saveNewForm(schema: { name: string, fields: [] }) {
+    return axios
+      .post(API_FORM, { schema: schema }, { headers: authHeader() })
+      .then(response => {
+        return response.data;
+      })
+      .catch(error => {
+        console.log(error)
+        return Promise.reject(error);
+      });
+  }
 }
 
 export default new FormService();

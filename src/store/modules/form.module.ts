@@ -47,7 +47,7 @@ class Form extends VuexModule {
   fetchSingleForm(id: string): Promise<any> {
     return FormService.fetchSingleForm(id).then(
       item => {
-        console.log(item)
+        console.log(item);
         this.context.commit('setCurrentForm', item);
         return Promise.resolve(item);
       },
@@ -59,6 +59,23 @@ class Form extends VuexModule {
         return Promise.reject(message);
       }
     );
+  }
+
+  @Action
+  saveNewForm(schema: { name: string, fields: [] }): Promise<any> {
+    return FormService.saveNewForm(schema).then(
+      () => {
+        console.log('saved schema: ', schema);
+        return Promise.resolve(schema);
+      },
+      error => {
+        const message =
+          (error.response && error.response.data && error.response.data.message) ||
+          error.message ||
+          error.toString();
+        return Promise.reject(message);
+      }
+    )
   }
 
   get getFormList(): Schema[] {

@@ -40,6 +40,18 @@
     background: $lightBlue;
   }
 
+  // input:focus:invalid, select:focus:invalid {
+  //   border: 1px solid $red;
+  //   background: rgba(235, 87, 87, 0.1);
+  //   &::placeholder {
+  //     color: $red;
+  //     opacity: 0.6;
+  //   }
+  //   &+label {
+  //     color: $red;
+  //   }
+  // }
+
   select {
     position: relative;
     -moz-appearance: none;
@@ -50,9 +62,9 @@
     background-position: right .7em top 50%, 0 0;
     background-size: .65em auto, 100%; 
 
-    &:required:invalid {
-      color: rgba(39, 39, 39, .3);
-    }
+    // &:required:invalid {
+    //   color: rgba(39, 39, 39, .3);
+    // }
 
     option {
       font-size: 20px;
@@ -64,6 +76,20 @@
         background: $lightBlue;
       }
     }
+    // &:invalid {
+    //   background-image: url('../images/icons/select-dropdown.svg'); 
+    //   background-repeat: no-repeat, repeat;
+    //   background-position: right .7em top 50%, 0 0;
+    //   background-size: .65em auto, 100%; 
+    // }
+
+    // &:focus:invalid {
+    //   color: rgba(235, 87, 87, .6);
+    //   background-image: url('../images/icons/select-dropdown.svg'); 
+    //   background-repeat: no-repeat, repeat;
+    //   background-position: right .7em top 50%, 0 0;
+    //   background-size: .65em auto, 100%; 
+    // }
   }
 }
 
@@ -80,6 +106,10 @@
     }
   }
   select {
+    background-image: url('../images/icons/select-dropdown.svg'); 
+    background-repeat: no-repeat, repeat;
+    background-position: right .7em top 50%, 0 0;
+    background-size: .65em auto, 100%;
     &:required:invalid {
       color: rgba(235, 87, 87, .6);
     }

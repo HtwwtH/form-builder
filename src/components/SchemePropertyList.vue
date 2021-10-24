@@ -1,37 +1,111 @@
 <template>
-  <div class="scheme-list"></div>
+  <div class="scheme-list">
+    <div class="field" :class="{ invalid: $v.schemeName.$error }">
+      <label for="scheme-name"
+        ><span class="asterisk">*</span>Название схемы</label
+      >
+      <input
+        id="scheme-name"
+        v-model="schemeName"
+        type="text"
+        placeholder="Укажите название схемы"
+        required
+        v-model.trim="$v.schemeName.$model"
+      />
+    </div>
+    <h2>Свойства схемы</h2>
+    <p class="hint">Схема должна содержать хотя бы одно свойство</p>
+    <div v-for="(item, index) in list" :key="item.key" class="added-property">
+      <div class="added-property__info">
+        <h4>Свойство {{ index + 1 }}: {{ item.label }}</h4>
+        <p>{{ getType(item.type) }}; {{ item.key }}</p>
+      </div>
+      <button class="added-property__remove" @click="list.splice(index, 1)">
+        <img src="../assets/images/icons/delete.svg" alt="" />
+      </button>
+    </div>
+    <SchemeProperty
+      @saveScheme="saveScheme"
+      @addToList="addToList"
+      :position="list.length + 1"
+    />
+  </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue, Provide } from "vue-property-decorator";
+import { required } from "vuelidate/lib/validators";
+import { namespace } from "vuex-class";
+const Form = namespace("Form");
 import SchemeProperty from "@/components/SchemeProperty.vue";
 
 @Component({
   components: {
     SchemeProperty,
   },
+  validations: {
+    schemeName: {
+      required,
+    },
+  },
 })
 export default class SchemePropertyList extends Vue {
-  // @Form.Getter("getCurrentForm")
-  // getCurrentForm!: any;
-  // @Form.Action
-  // private fetchSingleForm!: (id: string) => Promise<any>;
-  // get schemeName(): string {
-  //   return this.getCurrentForm.schema.name;
-  // }
-  // get fields(): [] {
-  //   return this.getCurrentForm.schema.fields;
-  // }
-  // mounted(): void {
-  //   const id = this.$route.params.id;
-  //   this.fetchSingleForm(id)
-  //     .then(() => {
-  //       console.log("fetched form on mounted");
-  //     })
-  //     .catch((error) => {
-  //       console.log(error);
-  //     });
-  // }
+  @Provide() typeLib = {
+    "Текстовое поле": "string",
+    "Числовое поле": "number",
+    Пароль: "password",
+    Чекбокс: "checkbox",
+    "Номер телефона": "phone",
+    "Выпадающий список": "select",
+  };
+
+  counter = 1;
+  schemeName = "";
+  list = [
+    {
+      key: "key",
+      label: "name",
+      type: "string",
+      validation: {
+        required: false,
+      },
+    },
+  ];
+
+  @Form.Action
+  private saveNewForm!: () => Promise<any>;
+
+  addToList(item): void {
+    console.log("add item: ", item);
+    this.list.push(item);
+    this.counter++;
+  }
+
+  getType(value: string): string {
+    return Object.keys(this.typeLib).find((key) => this.typeLib[key] === value);
+  }
+
+  saveScheme(item): void {
+    this.list.push(item);
+    this.$v.$touch();
+    if (this.$v.$invalid) {
+      this.submitStatus = "ERROR";
+    } else {
+      let result = {
+        name: this.schemeName,
+        fields: this.list,
+      };
+      console.log("result: ", JSON.stringify(result));
+      this.$router.push("/profile");
+      // this.saveNewForm(result)
+      //   .then(() => {
+      //     console.log("saved new form");
+      //   })
+      //   .catch((error) => {
+      //     console.log(error);
+      //   });
+    }
+  }
 }
 </script>
 
@@ -39,5 +113,48 @@ export default class SchemePropertyList extends Vue {
 @import "@/assets/styles/_vars.scss";
 
 .scheme-list {
+  .field {
+    padding-bottom: 30px;
+    margin-bottom: 40px;
+    border-bottom: 1px solid $mediumGray;
+    input {
+      max-width: 422px;
+    }
+  }
+  h2 {
+    margin-bottom: 8px;
+  }
+  .hint {
+    font-size: 16px;
+    line-height: 24px;
+    color: $black;
+    opacity: 0.5;
+    margin-bottom: 20px;
+  }
+  h4 {
+    position: relative;
+    &:before {
+      position: absolute;
+      left: -21px;
+      top: -1px;
+      content: url("../assets/images/icons/select-dropdown.svg");
+      transform: rotate(-90deg);
+    }
+  }
+}
+
+.added-property {
+  padding: 20px 36px;
+  border-bottom: 1px solid $grayText;
+  display: flex;
+  justify-content: space-between;
+  &__info {
+    p {
+      font-size: 14px;
+      line-height: 22px;
+      color: $dark;
+      opacity: 0.6;
+    }
+  }
 }
 </style>

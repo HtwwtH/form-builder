@@ -3,6 +3,11 @@
   &--blue {
     background: $blue;
     color: $white;
+
+    &:disabled {
+      cursor: default;
+      opacity: .5;
+    }
   }
 
   &--transparent {
