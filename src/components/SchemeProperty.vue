@@ -1,6 +1,6 @@
 <template>
   <div class="">
-    <form @submit.prevent="submit" class="property__content">
+    <form @submit.prevent="" class="property__content">
       <div class="scheme-property">
         <h4>Свойство {{ position }}: {{ labelField }}</h4>
         <div class="field" :class="{ invalid: $v.keyField.$error }">
@@ -38,7 +38,7 @@
             v-model="typeField"
             placeholder="Выберите поле для отображения"
             required
-            @change="setValidity"
+            @change="validateVisible = true"
           >
             <option value="" disabled selected hidden>
               Выберите поле для отображения
@@ -48,11 +48,11 @@
             <option>Пароль</option>
             <option>Чекбокс</option>
             <option>Номер телефона</option>
-            <!-- <option>Выпадающий список</option> -->
+            <option>Выпадающий список</option>
           </select>
         </div>
 
-        <OptionsList />
+        <OptionsList v-if="typeLib[typeField] == 'select'" />
       </div>
 
       <div v-if="validateVisible" class="scheme-validity">
@@ -159,7 +159,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Inject } from "vue-property-decorator";
+import { Component, Vue, Prop, Provide, Inject } from "vue-property-decorator";
 import { required } from "vuelidate/lib/validators";
 import OptionsList from "@/components/OptionsList.vue";
 
@@ -194,6 +194,12 @@ interface Field {
 export default class SchemeProperty extends Vue {
   @Prop() position!: number;
   @Inject() readonly typeLib;
+  @Provide() optionsList = [
+    {
+      key: "",
+      value: "",
+    },
+  ];
 
   validateVisible = false;
 
@@ -206,11 +212,6 @@ export default class SchemeProperty extends Vue {
   minVal = null;
   maxVal = null;
   pattern = "";
-
-  setValidity(): void {
-    console.log("setValidity");
-    this.validateVisible = true;
-  }
 
   addNewProperty(): void {
     this.$v.$touch();
@@ -235,6 +236,8 @@ export default class SchemeProperty extends Vue {
     if (this.pattern) obj.validation.pattern = this.pattern;
     if (this.typeLib[this.typeField] == "phone")
       obj.validation.pattern = "+7|8 ([0-9]{3}) [0-9]{3}-[0-9]{2}-[0-9]{2}";
+    if (this.typeLib[this.typeField] == "select")
+      obj.options = this.optionsList;
     console.log(obj);
     return obj;
   }
@@ -249,6 +252,12 @@ export default class SchemeProperty extends Vue {
     this.minVal = null;
     this.maxVal = null;
     this.pattern = "";
+    this.optionsList = [
+      {
+        key: "",
+        value: "",
+      },
+    ];
     this.$v.$reset();
   }
 

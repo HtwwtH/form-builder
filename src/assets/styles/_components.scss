@@ -8,17 +8,7 @@
   margin-right: 4px;
 }
 
-.field {
-  width: 100%;
-  margin-bottom: 20px;
-
-  label {
-    display: block;
-    font-size: 16px;
-    line-height: 22px;
-    color: $dark;
-  }
-  input, select {
+input, select, .option-add__btn {
     width: 100%;
     display: block;
     padding: 12px 15px;
@@ -33,24 +23,21 @@
       color: $dark;
       opacity: 0.3;
     }
+
+    &:disabled {
+      background: white;
+    }
+  }
+
+  .option-add__btn {
+    color: rgba(39, 39, 39, .3);
+    text-align: left;
   }
 
   input:focus {
     border: 1px solid $blue;
     background: $lightBlue;
   }
-
-  // input:focus:invalid, select:focus:invalid {
-  //   border: 1px solid $red;
-  //   background: rgba(235, 87, 87, 0.1);
-  //   &::placeholder {
-  //     color: $red;
-  //     opacity: 0.6;
-  //   }
-  //   &+label {
-  //     color: $red;
-  //   }
-  // }
 
   select {
     position: relative;
@@ -62,10 +49,6 @@
     background-position: right .7em top 50%, 0 0;
     background-size: .65em auto, 100%; 
 
-    // &:required:invalid {
-    //   color: rgba(39, 39, 39, .3);
-    // }
-
     option {
       font-size: 20px;
       line-height: 48px;
@@ -76,20 +59,17 @@
         background: $lightBlue;
       }
     }
-    // &:invalid {
-    //   background-image: url('../images/icons/select-dropdown.svg'); 
-    //   background-repeat: no-repeat, repeat;
-    //   background-position: right .7em top 50%, 0 0;
-    //   background-size: .65em auto, 100%; 
-    // }
+  }
 
-    // &:focus:invalid {
-    //   color: rgba(235, 87, 87, .6);
-    //   background-image: url('../images/icons/select-dropdown.svg'); 
-    //   background-repeat: no-repeat, repeat;
-    //   background-position: right .7em top 50%, 0 0;
-    //   background-size: .65em auto, 100%; 
-    // }
+.field {
+  width: 100%;
+  margin-bottom: 20px;
+
+  label {
+    display: block;
+    font-size: 16px;
+    line-height: 22px;
+    color: $dark;
   }
 }
 

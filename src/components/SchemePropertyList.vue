@@ -62,14 +62,14 @@ export default class SchemePropertyList extends Vue {
   counter = 1;
   schemeName = "";
   list = [
-    {
-      key: "key",
-      label: "name",
-      type: "string",
-      validation: {
-        required: false,
-      },
-    },
+    // {
+    //   key: "key",
+    //   label: "name",
+    //   type: "string",
+    //   validation: {
+    //     required: false,
+    //   },
+    // },
   ];
 
   @Form.Action
