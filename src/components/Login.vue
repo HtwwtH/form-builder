@@ -58,7 +58,9 @@
           </button>
         </div>
       </div>
-      <button type="submit" class="btn btn--default btn--blue">Войти</button>
+      <div class="login__button">
+        <button type="submit" class="btn btn--default btn--blue">Войти</button>
+      </div>
     </form>
   </div>
 </template>
@@ -74,8 +76,8 @@ export default class Login extends Vue {
   passVisible = true;
   error = false;
 
-  @Auth.Getter
-  private isLoggedIn!: boolean;
+  @Auth.Getter("isLoggedIn")
+  isLoggedIn!: boolean;
 
   @Auth.Action
   private login!: (data: {
@@ -204,5 +206,10 @@ export default class Login extends Vue {
     margin-top: 20px;
     width: 176px;
   }
+}
+
+.login__button {
+  display: flex;
+  justify-content: center;
 }
 </style>

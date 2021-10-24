@@ -34,9 +34,7 @@
           >
           <select
             id="typeInput"
-            ref="typeInput"
             v-model="typeField"
-            placeholder="Выберите поле для отображения"
             required
             @change="validateVisible = true"
           >
@@ -141,7 +139,7 @@
     <div class="property__buttons">
       <button
         @click="addNewProperty"
-        type="submit"
+        type="button"
         class="btn btn--default btn--transparent"
       >
         Добавить новое свойство
@@ -149,7 +147,7 @@
       <button
         type="button"
         class="btn btn--default btn--blue"
-        :disabled="position == 1"
+        :disabled="isDisabled"
         @click="saveNewScheme"
       >
         Сохранить схему
@@ -161,7 +159,9 @@
 <script lang="ts">
 import { Component, Vue, Prop, Provide, Inject } from "vue-property-decorator";
 import { required } from "vuelidate/lib/validators";
+import { namespace } from "vuex-class";
 import OptionsList from "@/components/OptionsList.vue";
+const Scheme = namespace("Scheme");
 
 interface Validity {
   required: boolean;
@@ -212,6 +212,19 @@ export default class SchemeProperty extends Vue {
   minVal = null;
   maxVal = null;
   pattern = "";
+
+  get isDisabled(): boolean {
+    if (
+      (this.keyField == "") &
+      (this.labelField == "") &
+      (this.typeField == "")
+    )
+      return true;
+    else return false;
+  }
+
+  @Scheme.Action
+  private addToListAction!: (item) => void;
 
   addNewProperty(): void {
     this.$v.$touch();
@@ -264,13 +277,19 @@ export default class SchemeProperty extends Vue {
   createProperty(): void {
     let obj = this.getProperty();
     this.clearProperty();
-    this.$emit("addToList", obj);
+    this.addToListAction(obj);
   }
 
   saveNewScheme(): void {
-    let obj = this.getProperty();
-    this.clearProperty();
-    this.$emit("saveScheme", obj);
+    this.$v.$touch();
+    if (this.$v.$invalid) {
+      this.submitStatus = "ERROR";
+    } else {
+      let obj = this.getProperty();
+      // this.addToListAction(obj);
+      // this.clearProperty();
+      this.$emit("saveScheme", obj);
+    }
   }
 }
 </script>
@@ -309,6 +328,7 @@ export default class SchemeProperty extends Vue {
   }
 }
 
+// toggler
 .scheme-validity__toggle {
   label {
     font-size: 18px;

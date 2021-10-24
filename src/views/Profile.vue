@@ -3,6 +3,9 @@
     <div class="container">
       <h2>Мои схемы</h2>
       <FormList />
+      <router-link to="/new-scheme" class="btn btn--default btn--blue"
+        >Создать схему</router-link
+      >
     </div>
   </div>
 </template>
@@ -19,11 +22,11 @@ const Auth = namespace("Auth");
   },
 })
 export default class Profile extends Vue {
-  @Auth.State("user")
-  private currentUser;
+  @Auth.Getter("isLoggedIn")
+  isLoggedIn!: boolean;
 
   mounted(): void {
-    if (!this.currentUser) {
+    if (!this.isLoggedIn) {
       this.$router.push("/");
     }
   }
@@ -36,6 +39,11 @@ export default class Profile extends Vue {
 
   h2 {
     margin-bottom: 40px;
+  }
+
+  .btn {
+    margin-top: 40px;
+    width: fit-content;
   }
 }
 </style>

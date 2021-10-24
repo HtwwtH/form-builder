@@ -19,11 +19,11 @@ const Auth = namespace("Auth");
   },
 })
 export default class NewSchemePage extends Vue {
-  @Auth.State("user")
-  private currentUser;
+  @Auth.Getter("isLoggedIn")
+  isLoggedIn!: boolean;
 
   mounted(): void {
-    if (!this.currentUser) {
+    if (!this.isLoggedIn) {
       this.$router.push("/");
     }
   }

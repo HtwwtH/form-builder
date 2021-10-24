@@ -1,6 +1,6 @@
 <template>
   <div class="options-list">
-    <div v-for="(item, index) in optionsList" :key="item.key" class="option">
+    <div v-for="(item, index) in optionsList" :key="item.value" class="option">
       <div class="option__value">
         <input
           type="text"
@@ -88,22 +88,6 @@ export default class OptionsList extends Vue {
 }
 .option__key {
   position: relative;
-  // label {
-  //   display: none;
-  // }
-  // &.invalid {
-  //   &:after {
-  //     content: url("../assets/images/icons/alert-circle.svg");
-  //     display: block;
-  //     position: absolute;
-  //     top: 12px;
-  //     right: 12px;
-  //   }
-  //   label {
-  //     color: $red;
-  //     display: block;
-  //   }
-  // }
 
   input + label {
     display: none;

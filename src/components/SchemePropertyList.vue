@@ -24,11 +24,7 @@
         <img src="../assets/images/icons/delete.svg" alt="" />
       </button>
     </div>
-    <SchemeProperty
-      @saveScheme="saveScheme"
-      @addToList="addToList"
-      :position="list.length + 1"
-    />
+    <SchemeProperty @saveScheme="saveScheme" :position="list.length + 1" />
   </div>
 </template>
 
@@ -37,6 +33,7 @@ import { Component, Vue, Provide } from "vue-property-decorator";
 import { required } from "vuelidate/lib/validators";
 import { namespace } from "vuex-class";
 const Form = namespace("Form");
+const Scheme = namespace("Scheme");
 import SchemeProperty from "@/components/SchemeProperty.vue";
 
 @Component({
@@ -59,26 +56,22 @@ export default class SchemePropertyList extends Vue {
     "Выпадающий список": "select",
   };
 
-  counter = 1;
   schemeName = "";
-  list = [
-    // {
-    //   key: "key",
-    //   label: "name",
-    //   type: "string",
-    //   validation: {
-    //     required: false,
-    //   },
-    // },
-  ];
 
   @Form.Action
   private saveNewForm!: () => Promise<any>;
 
-  addToList(item): void {
-    console.log("add item: ", item);
-    this.list.push(item);
-    this.counter++;
+  @Scheme.Action
+  private addToListAction!: (item) => void;
+
+  @Scheme.Action
+  private clearListAction!: () => void;
+
+  @Scheme.Getter("getSchemeList")
+  schemeList!: [];
+
+  get list(): [] {
+    return this.schemeList;
   }
 
   getType(value: string): string {
@@ -86,24 +79,25 @@ export default class SchemePropertyList extends Vue {
   }
 
   saveScheme(item): void {
-    this.list.push(item);
     this.$v.$touch();
     if (this.$v.$invalid) {
       this.submitStatus = "ERROR";
     } else {
+      this.addToListAction(item);
       let result = {
         name: this.schemeName,
         fields: this.list,
       };
-      console.log("result: ", JSON.stringify(result));
-      this.$router.push("/profile");
-      // this.saveNewForm(result)
-      //   .then(() => {
-      //     console.log("saved new form");
-      //   })
-      //   .catch((error) => {
-      //     console.log(error);
-      //   });
+      console.log("result: ", result);
+
+      this.saveNewForm(result)
+        .then(() => {
+          this.clearListAction();
+          this.$router.push("/profile");
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     }
   }
 }
