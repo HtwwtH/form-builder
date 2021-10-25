@@ -1,14 +1,6 @@
 import { VuexModule, Module, Mutation, Action } from 'vuex-module-decorators';
 import FormService from '@/services/forms/formService';
-
-interface Schema {
-  id: string,
-  schema: {
-    name: string,
-    fields: []
-  }
-}
-
+import { Schema } from '@/Interfaces'
 @Module({ namespaced: true, stateFactory: true })
 class Form extends VuexModule {
   public formList: Schema[] = [];
@@ -62,7 +54,7 @@ class Form extends VuexModule {
   }
 
   @Action
-  saveNewForm(schema: { name: string, fields: [] }): Promise<any> {
+  saveNewForm(schema: Schema): Promise<any> {
     return FormService.saveNewForm(schema).then(
       () => {
         console.log('saved schema: ', schema);

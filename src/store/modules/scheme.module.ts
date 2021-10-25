@@ -1,4 +1,10 @@
 import { VuexModule, Module, Mutation, Action } from 'vuex-module-decorators';
+
+interface Option {
+  id: string;
+  key: string;
+  value: string;
+}
 interface Scheme {
   key: string,
   label: string,
@@ -9,7 +15,7 @@ interface Scheme {
     max?: number,
     pattern?: string
   },
-  options?: []
+  options?: Option[];
 }
 
 @Module({ namespaced: true, stateFactory: true })
@@ -22,6 +28,7 @@ class Scheme extends VuexModule {
     this.schemeList.push(item);
   }
 
+  @Mutation
   public clearList(): void {
     this.schemeList = [];
   }
@@ -35,8 +42,6 @@ class Scheme extends VuexModule {
   clearListAction(): void {
     this.context.commit('clearList');
   }
-
-
 
   get getSchemeList(): Scheme[] {
     return this.schemeList;

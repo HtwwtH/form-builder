@@ -1,6 +1,7 @@
 import axios from 'axios';
 import authHeader from '../auth/auth-header';
 import { API_FORM } from '@/api'
+import { Schema } from '@/Interfaces'
 
 class FormService {
   async fetchForms() {
@@ -26,7 +27,8 @@ class FormService {
       });
   }
 
-  async saveNewForm(schema: { name: string, fields: [] }) {
+  async saveNewForm(schema: Schema) {
+    console.log(schema)
     return axios
       .post(API_FORM, { schema: schema }, { headers: authHeader() })
       .then(response => {

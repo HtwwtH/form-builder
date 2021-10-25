@@ -15,15 +15,20 @@
     </div>
     <h2>Свойства схемы</h2>
     <p class="hint">Схема должна содержать хотя бы одно свойство</p>
+
     <div v-for="(item, index) in list" :key="item.key" class="added-property">
-      <div class="added-property__info">
-        <h4>Свойство {{ index + 1 }}: {{ item.label }}</h4>
-        <p>{{ getType(item.type) }}; {{ item.key }}</p>
+      <div class="added-property__header">
+        <div class="added-property__info">
+          <h4>Свойство {{ index + 1 }}: {{ item.label }}</h4>
+          <p>{{ getType(item.type) }}; {{ item.key }}</p>
+        </div>
+        <button class="added-property__remove" @click="list.splice(index, 1)">
+          <img src="../assets/images/icons/delete.svg" alt="" />
+        </button>
       </div>
-      <button class="added-property__remove" @click="list.splice(index, 1)">
-        <img src="../assets/images/icons/delete.svg" alt="" />
-      </button>
+      <!-- <SchemeProperty @saveScheme="saveScheme" :position="index + 1" /> -->
     </div>
+
     <SchemeProperty @saveScheme="saveScheme" :position="list.length + 1" />
   </div>
 </template>
@@ -35,6 +40,7 @@ import { namespace } from "vuex-class";
 const Form = namespace("Form");
 const Scheme = namespace("Scheme");
 import SchemeProperty from "@/components/SchemeProperty.vue";
+import { Field, TypeLib, Schema } from "@/Interfaces";
 
 @Component({
   components: {
@@ -47,7 +53,7 @@ import SchemeProperty from "@/components/SchemeProperty.vue";
   },
 })
 export default class SchemePropertyList extends Vue {
-  @Provide() typeLib = {
+  @Provide() typeLib: any = {
     "Текстовое поле": "string",
     "Числовое поле": "number",
     Пароль: "password",
@@ -57,12 +63,13 @@ export default class SchemePropertyList extends Vue {
   };
 
   schemeName = "";
+  submitStatus = "";
 
   @Form.Action
-  private saveNewForm!: () => Promise<any>;
+  private saveNewForm!: (item: Schema) => Promise<any>;
 
   @Scheme.Action
-  private addToListAction!: (item) => void;
+  private addToListAction!: (item: Field) => void;
 
   @Scheme.Action
   private clearListAction!: () => void;
@@ -70,7 +77,7 @@ export default class SchemePropertyList extends Vue {
   @Scheme.Getter("getSchemeList")
   schemeList!: [];
 
-  get list(): [] {
+  get list(): Field[] {
     return this.schemeList;
   }
 
@@ -78,7 +85,7 @@ export default class SchemePropertyList extends Vue {
     return Object.keys(this.typeLib).find((key) => this.typeLib[key] === value);
   }
 
-  saveScheme(item): void {
+  saveScheme(item: Field): void {
     this.$v.$touch();
     if (this.$v.$invalid) {
       this.submitStatus = "ERROR";
@@ -138,6 +145,9 @@ export default class SchemePropertyList extends Vue {
 }
 
 .added-property {
+}
+
+.added-property__header {
   padding: 20px 36px;
   border-bottom: 1px solid $grayText;
   display: flex;

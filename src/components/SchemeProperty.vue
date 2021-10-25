@@ -50,7 +50,10 @@
           </select>
         </div>
 
-        <OptionsList v-if="typeLib[typeField] == 'select'" />
+        <OptionsList
+          v-if="typeLib[typeField] == 'select'"
+          @updateOptionsList="updateOptionsList"
+        />
       </div>
 
       <div v-if="validateVisible" class="scheme-validity">
@@ -161,19 +164,8 @@ import { Component, Vue, Prop, Provide, Inject } from "vue-property-decorator";
 import { required } from "vuelidate/lib/validators";
 import { namespace } from "vuex-class";
 import OptionsList from "@/components/OptionsList.vue";
+import { Validity, Option, Field, TypeLib } from "@/Interfaces";
 const Scheme = namespace("Scheme");
-
-interface Validity {
-  required: boolean;
-}
-
-interface Field {
-  key: string;
-  label: string;
-  type: string;
-  validation: Validity;
-  options?: [];
-}
 
 @Component({
   components: {
@@ -194,19 +186,23 @@ interface Field {
 export default class SchemeProperty extends Vue {
   @Prop() position!: number;
   @Inject() readonly typeLib;
-  @Provide() optionsList = [
+
+  optionsList: Option[] = [
     {
+      id: new Date().toString(),
       key: "",
       value: "",
     },
   ];
+
+  submitStatus = "";
 
   validateVisible = false;
 
   keyField = "";
   labelField = "";
   typeField = "";
-  validation = {
+  validation: Validity = {
     required: false,
   };
   minVal = null;
@@ -214,17 +210,17 @@ export default class SchemeProperty extends Vue {
   pattern = "";
 
   get isDisabled(): boolean {
-    if (
-      (this.keyField == "") &
-      (this.labelField == "") &
-      (this.typeField == "")
-    )
+    if (this.keyField == "" && this.labelField == "" && this.typeField == "")
       return true;
     else return false;
   }
 
   @Scheme.Action
-  private addToListAction!: (item) => void;
+  private addToListAction!: (item: Field) => void;
+
+  updateOptionsList(data: Option[]): void {
+    this.optionsList = data;
+  }
 
   addNewProperty(): void {
     this.$v.$touch();
@@ -236,7 +232,7 @@ export default class SchemeProperty extends Vue {
   }
 
   getProperty(): Field {
-    let obj = {
+    let obj: Field = {
       key: this.keyField,
       label: this.labelField,
       type: this.typeLib[this.typeField],
@@ -244,14 +240,22 @@ export default class SchemeProperty extends Vue {
         required: this.validation.required,
       },
     };
-    if (this.minVal) obj.validation.min = this.minVal;
-    if (this.maxVal) obj.validation.max = this.maxVal;
+    if (this.typeLib[this.typeField] == "string") {
+      if (this.minVal) obj.validation.minlength = this.minVal;
+      if (this.maxVal) obj.validation.maxlength = this.maxVal;
+    }
+    if (this.typeLib[this.typeField] == "number") {
+      if (this.minVal) obj.validation.min = this.minVal;
+      if (this.maxVal) obj.validation.max = this.maxVal;
+    }
     if (this.pattern) obj.validation.pattern = this.pattern;
     if (this.typeLib[this.typeField] == "phone")
-      obj.validation.pattern = "+7|8 ([0-9]{3}) [0-9]{3}-[0-9]{2}-[0-9]{2}";
-    if (this.typeLib[this.typeField] == "select")
+      obj.validation.pattern =
+        "[+7|8] [(][0-9]{3}[)] [0-9]{3}-[0-9]{2}-[0-9]{2}";
+    if (this.typeLib[this.typeField] == "select") {
       obj.options = this.optionsList;
-    console.log(obj);
+    }
+
     return obj;
   }
 
@@ -267,6 +271,7 @@ export default class SchemeProperty extends Vue {
     this.pattern = "";
     this.optionsList = [
       {
+        id: new Date().toString(),
         key: "",
         value: "",
       },
@@ -286,8 +291,6 @@ export default class SchemeProperty extends Vue {
       this.submitStatus = "ERROR";
     } else {
       let obj = this.getProperty();
-      // this.addToListAction(obj);
-      // this.clearProperty();
       this.$emit("saveScheme", obj);
     }
   }

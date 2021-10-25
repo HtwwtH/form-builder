@@ -10,44 +10,16 @@
         class="field"
         :class="{ invalid: userData[i].invalid }"
       >
-        <label v-if="item.type != 'checkbox'"
-          ><span v-if="item.validation.required" class="asterisk">*</span
-          >{{ item.label }}
-        </label>
-
-        <select
-          v-if="item.type == 'select'"
-          v-model="userData[i].userValue"
-          @change="userData[i].invalid = false"
-        >
-          <option value="" disabled selected hidden>
-            Выберите поле для отображения
-          </option>
-          <option v-for="option in item.options" :key="option.key">
-            {{ option.value }}
-          </option>
-        </select>
-
-        <label v-else-if="item.type == 'checkbox'" class="custom-checkbox">
-          <input
-            :type="item.type"
-            :required="item.validation.required"
-            v-model="userData[i].userValue"
-            @input="userData[i].invalid = false"
-          />
-          <span>{{ item.label }}</span>
-        </label>
-
-        <input
-          v-else
-          :type="item.type"
-          :placeholder="'Введите ' + item.label"
-          v-model="userData[i].userValue"
-          @input="userData[i].invalid = false"
-        />
+        <InputField :item="item" :i="i" />
       </div>
 
-      <button type="submit" class="btn btn--wide btn--blue">Валидация</button>
+      <button
+        @click="validationError = true"
+        type="submit"
+        class="btn btn--wide btn--blue"
+      >
+        Валидация
+      </button>
 
       <div v-if="validationError" class="validate-failure">
         <span>Валидация не пройдена.</span>
@@ -60,21 +32,29 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue, Provide } from "vue-property-decorator";
 import { namespace } from "vuex-class";
-import Field from "@/components/Field.vue";
+import InputField from "@/components/InputField.vue";
+import { Field } from "@/Interfaces";
 const Form = namespace("Form");
+
+interface UserInput {
+  name: string;
+  required: boolean;
+  userValue: string;
+  invalid: boolean;
+}
 
 @Component({
   components: {
-    Field,
+    InputField,
   },
 })
 export default class Scheme extends Vue {
   loading = false;
   schemeName = "";
-  fields = [];
-  userData = [];
+  fields: Field[] = [];
+  @Provide() userData: UserInput[] = [];
   validationError = false;
   validationSuccess = false;
 
@@ -107,24 +87,26 @@ export default class Scheme extends Vue {
       });
   }
 
-  setStatus(): void {
-    if (
-      this.userData.filter((item) => item.required & (item.userValue === ""))
-        .length == 0
-    )
-      this.validationSuccess = true;
-    else this.validationError = true;
-  }
+  // setStatus(): void {
+  //   if (
+  //     this.userData.filter((item) => item.required && item.userValue === "")
+  //       .length == 0
+  //   )
+  //     this.validationSuccess = true;
+  //   else this.validationError = true;
+  // }
 
   onSubmit(): void {
-    this.validationSuccess = false;
+    // this.validationSuccess = false;
+    // this.validationError = false;
+    // this.userData.forEach((item) => {
+    //   if (item.required && item.userValue === "") {
+    //     item.invalid = true;
+    //   }
+    // });
+    // this.setStatus();
     this.validationError = false;
-    this.userData.forEach((item) => {
-      if (item.required & (item.userValue === "")) {
-        item.invalid = true;
-      }
-    });
-    this.setStatus();
+    this.validationSuccess = true;
   }
 }
 </script>

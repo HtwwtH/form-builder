@@ -1,6 +1,6 @@
 <template>
   <div class="options-list">
-    <div v-for="(item, index) in optionsList" :key="item.value" class="option">
+    <div v-for="(item, index) in optionsList" :key="item.id" class="option">
       <div class="option__value">
         <input
           type="text"
@@ -28,38 +28,47 @@
       </div>
     </div>
 
-    <button class="option-add__btn" type="button" @click="addOption">
+    <button class="option-add__btn" type="button" @click="addOption()">
       Add option
     </button>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Inject } from "vue-property-decorator";
-import { required } from "vuelidate/lib/validators";
+import { Component, Vue } from "vue-property-decorator";
+import { OptionField } from "@/Interfaces";
 
 @Component({
   components: {},
-  validations: {
-    schemeName: {
-      required,
-    },
-  },
 })
 export default class OptionsList extends Vue {
-  @Inject() optionsList;
-
-  addOption(): void {
-    this.optionsList.push({
+  optionsList: OptionField[] = [
+    {
+      id: new Date().toString(),
       key: "",
       value: "",
-    });
+    },
+  ];
+
+  addOption(): void {
+    if (
+      this.optionsList[this.optionsList.length].key &&
+      this.optionsList[this.optionsList.length].value
+    ) {
+      this.optionsList.push({
+        id: new Date().toString(),
+        key: "",
+        value: "",
+      });
+      this.$emit("updateOptionsList", this.optionsList);
+    }
   }
 
   checkUnique(key: string): boolean {
     if (
-      (key === "") |
-      (this.optionsList.filter((item) => item.key == key).length == 1)
+      key === "" ||
+      this.optionsList.filter((item: OptionField) => item.key == key).length ==
+        1
     )
       return true;
     else return false;
