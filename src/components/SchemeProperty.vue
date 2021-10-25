@@ -1,8 +1,8 @@
 <template>
   <div class="">
-    <form @submit.prevent="" class="property__content">
+    <div class="property__content">
       <div class="scheme-property">
-        <h4>Свойство {{ position }}: {{ labelField }}</h4>
+        <h4>Свойство {{ position + 1 }}: {{ labelField }}</h4>
         <div class="field" :class="{ invalid: $v.keyField.$error }">
           <label for="keyInput"
             ><span class="asterisk">*</span>Ключ свойства</label
@@ -13,7 +13,7 @@
             type="text"
             placeholder="Укажите ключ свойства"
             required
-            v-model.trim="$v.keyField.$model"
+            @change="updateListState(position)"
           />
         </div>
         <div class="field" :class="{ invalid: $v.labelField.$error }">
@@ -26,6 +26,7 @@
             type="text"
             placeholder="Укажите название свойства"
             required
+            @change="updateListState(position)"
           />
         </div>
         <div class="field" :class="{ invalid: $v.typeField.$error }">
@@ -36,7 +37,10 @@
             id="typeInput"
             v-model="typeField"
             required
-            @change="validateVisible = true"
+            @change="
+              validateVisible = true;
+              updateListState(position);
+            "
           >
             <option value="" disabled selected hidden>
               Выберите поле для отображения
@@ -137,34 +141,16 @@
           </div>
         </div>
       </div>
-    </form>
-
-    <div class="property__buttons">
-      <button
-        @click="addNewProperty"
-        type="button"
-        class="btn btn--default btn--transparent"
-      >
-        Добавить новое свойство
-      </button>
-      <button
-        type="button"
-        class="btn btn--default btn--blue"
-        :disabled="isDisabled"
-        @click="saveNewScheme"
-      >
-        Сохранить схему
-      </button>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Provide, Inject } from "vue-property-decorator";
+import { Component, Vue, Prop, Inject, Watch } from "vue-property-decorator";
 import { required } from "vuelidate/lib/validators";
 import { namespace } from "vuex-class";
 import OptionsList from "@/components/OptionsList.vue";
-import { Validity, Option, Field, TypeLib } from "@/Interfaces";
+import { Validity, Option, Field } from "@/Interfaces";
 const Scheme = namespace("Scheme");
 
 @Component({
@@ -209,26 +195,61 @@ export default class SchemeProperty extends Vue {
   maxVal = null;
   pattern = "";
 
-  get isDisabled(): boolean {
-    if (this.keyField == "" && this.labelField == "" && this.typeField == "")
-      return true;
-    else return false;
-  }
+  // get isDisabled(): boolean {
+  //   if (this.keyField == "" && this.labelField == "" && this.typeField == "")
+  //     return true;
+  //   else return false;
+  // }
 
   @Scheme.Action
   private addToListAction!: (item: Field) => void;
 
-  updateOptionsList(data: Option[]): void {
-    this.optionsList = data;
+  @Scheme.Mutation("updateList")
+  private updateList!: ({ item, index }) => void;
+
+  @Scheme.Getter("getSchemeList")
+  schemeList!: [];
+
+  @Scheme.Getter("getNewPropertyTrigger")
+  triggerNewProperty!: false;
+  @Scheme.Getter("getNewSchemeTrigger")
+  triggerNewScheme!: false;
+
+  get list(): Field[] {
+    return this.schemeList;
   }
 
+  @Watch("triggerNewProperty")
   addNewProperty(): void {
+    console.log("try to addNewProperty");
     this.$v.$touch();
     if (this.$v.$invalid) {
       this.submitStatus = "ERROR";
     } else {
-      this.createProperty();
+      this.clearProperty();
+      this.$emit("addNewProperty");
     }
+  }
+
+  @Watch("triggerNewScheme")
+  addNewScheme(): void {
+    console.log("try to addNewScheme");
+    this.$v.$touch();
+    if (this.$v.$invalid) {
+      this.submitStatus = "ERROR";
+    } else {
+      this.$emit("saveNewScheme");
+    }
+  }
+
+  updateListState(index: number): void {
+    let obj = this.getProperty();
+    console.log("aggregated ", obj);
+    this.updateList([obj, index]);
+  }
+
+  updateOptionsList(data: Option[]): void {
+    this.optionsList = data;
   }
 
   getProperty(): Field {
@@ -279,21 +300,21 @@ export default class SchemeProperty extends Vue {
     this.$v.$reset();
   }
 
-  createProperty(): void {
-    let obj = this.getProperty();
-    this.clearProperty();
-    this.addToListAction(obj);
-  }
+  // createProperty(): void {
+  //   let obj = this.getProperty();
+  //   this.clearProperty();
+  //   this.addToListAction(obj);
+  // }
 
-  saveNewScheme(): void {
-    this.$v.$touch();
-    if (this.$v.$invalid) {
-      this.submitStatus = "ERROR";
-    } else {
-      let obj = this.getProperty();
-      this.$emit("saveScheme", obj);
-    }
-  }
+  // saveNewScheme(): void {
+  //   this.$v.$touch();
+  //   if (this.$v.$invalid) {
+  //     this.submitStatus = "ERROR";
+  //   } else {
+  //     let obj = this.getProperty();
+  //     this.$emit("saveScheme", obj);
+  //   }
+  // }
 }
 </script>
 
@@ -378,13 +399,6 @@ export default class SchemeProperty extends Vue {
   .toggle-button:checked {
     background-color: $blue;
   }
-}
-
-.property__buttons {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
 // range

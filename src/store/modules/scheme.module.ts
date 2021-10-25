@@ -1,36 +1,46 @@
 import { VuexModule, Module, Mutation, Action } from 'vuex-module-decorators';
-
-interface Option {
-  id: string;
-  key: string;
-  value: string;
-}
-interface Scheme {
-  key: string,
-  label: string,
-  type: string,
-  validation: {
-    required: boolean,
-    min?: number,
-    max?: number,
-    pattern?: string
-  },
-  options?: Option[];
-}
-
+import { Field } from '@/Interfaces'
 @Module({ namespaced: true, stateFactory: true })
 class Scheme extends VuexModule {
-  public schemeList: Scheme[] = [];
+  public schemeList: Field[] = [
+    {
+      key: '',
+      label: '',
+      type: '',
+      validation: {
+        required: false,
+      },
+    }
+  ];
+
+  public triggerNewProperty = false;
+  public triggerNewScheme = false;
 
   @Mutation
-  public addToList(item: Scheme): void {
+  public addToList(item: Field): void {
     console.log("add item to store list: ", item);
     this.schemeList.push(item);
   }
 
   @Mutation
+  public updateList(payload: [item: Field, index: number]): void {
+    const [item, index] = payload
+    this.schemeList[index] = item;
+  }
+
+  @Mutation
   public clearList(): void {
     this.schemeList = [];
+  }
+
+  @Mutation
+  public triggerNewPropertyChange(): void {
+    this.triggerNewProperty = !this.triggerNewProperty;
+  }
+
+  @Mutation
+  public triggerNewSchemeChange(): void {
+    this.triggerNewScheme = !this.triggerNewScheme;
   }
 
   @Action
@@ -43,8 +53,31 @@ class Scheme extends VuexModule {
     this.context.commit('clearList');
   }
 
-  get getSchemeList(): Scheme[] {
+  @Action
+  triggerNewPropertyAction(): void {
+    this.context.commit('triggerNewPropertyChange');
+  }
+
+  @Action
+  triggerNewSchemeAction(): void {
+    this.context.commit('triggerNewSchemeChange');
+  }
+
+  // @Action
+  // updateListAction(item: Field, index: number): void {
+  //   this.context.commit('updateList', item, index);
+  // }
+
+  get getSchemeList(): Field[] {
     return this.schemeList;
+  }
+
+  get getNewPropertyTrigger(): boolean {
+    return this.triggerNewProperty;
+  }
+
+  get getNewSchemeTrigger(): boolean {
+    return this.triggerNewScheme;
   }
 
 }

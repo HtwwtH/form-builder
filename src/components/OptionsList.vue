@@ -52,8 +52,8 @@ export default class OptionsList extends Vue {
 
   addOption(): void {
     if (
-      this.optionsList[this.optionsList.length].key &&
-      this.optionsList[this.optionsList.length].value
+      this.optionsList[this.optionsList.length - 1].key &&
+      this.optionsList[this.optionsList.length - 1].value
     ) {
       this.optionsList.push({
         id: new Date().toString(),

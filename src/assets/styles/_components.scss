@@ -130,3 +130,26 @@ input, select, .option-add__btn {
   background-position: center center;
   opacity: 1;
 }
+
+
+input:focus:invalid,
+  select:focus:invalid {
+    border: 1px solid $red;
+    background: rgba(235, 87, 87, 0.1);
+    &::placeholder {
+      color: $red;
+      opacity: 0.6;
+    }
+    & + label {
+      color: $red;
+    }
+  }
+  select:focus:invalid {
+    background-image: url("../images/icons/select-dropdown.svg");
+    background-repeat: no-repeat, repeat;
+    background-position: right 0.7em top 50%, 0 0;
+    background-size: 0.65em auto, 100%;
+    &:required:invalid {
+      color: rgba(235, 87, 87, 0.6);
+    }
+  }

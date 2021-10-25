@@ -10,14 +10,13 @@
         type="text"
         placeholder="Укажите название схемы"
         required
-        v-model.trim="$v.schemeName.$model"
       />
     </div>
     <h2>Свойства схемы</h2>
     <p class="hint">Схема должна содержать хотя бы одно свойство</p>
 
     <div v-for="(item, index) in list" :key="item.key" class="added-property">
-      <div class="added-property__header">
+      <div v-if="index < list.length - 1" class="added-property__header">
         <div class="added-property__info">
           <h4>Свойство {{ index + 1 }}: {{ item.label }}</h4>
           <p>{{ getType(item.type) }}; {{ item.key }}</p>
@@ -26,10 +25,35 @@
           <img src="../assets/images/icons/delete.svg" alt="" />
         </button>
       </div>
-      <!-- <SchemeProperty @saveScheme="saveScheme" :position="index + 1" /> -->
+      <keep-alive>
+        <SchemeProperty
+          v-if="index == list.length - 1"
+          @saveNewScheme="saveNewScheme"
+          @addNewProperty="addNewProperty"
+          :position="index"
+        />
+      </keep-alive>
     </div>
 
-    <SchemeProperty @saveScheme="saveScheme" :position="list.length + 1" />
+    <!-- <SchemeProperty @saveScheme="saveScheme" :position="list.length + 1" /> -->
+
+    <div class="property__buttons">
+      <button
+        @click="triggerNewProperty"
+        type="button"
+        class="btn btn--default btn--transparent"
+      >
+        Добавить новое свойство
+      </button>
+      <button
+        @click="validateScheme"
+        type="button"
+        class="btn btn--default btn--blue"
+        :disabled="false"
+      >
+        Сохранить схему
+      </button>
+    </div>
   </div>
 </template>
 
@@ -40,7 +64,7 @@ import { namespace } from "vuex-class";
 const Form = namespace("Form");
 const Scheme = namespace("Scheme");
 import SchemeProperty from "@/components/SchemeProperty.vue";
-import { Field, TypeLib, Schema } from "@/Interfaces";
+import { Field, Schema } from "@/Interfaces";
 
 @Component({
   components: {
@@ -64,6 +88,7 @@ export default class SchemePropertyList extends Vue {
 
   schemeName = "";
   submitStatus = "";
+  triggerAddNewProperty = 0;
 
   @Form.Action
   private saveNewForm!: (item: Schema) => Promise<any>;
@@ -74,6 +99,12 @@ export default class SchemePropertyList extends Vue {
   @Scheme.Action
   private clearListAction!: () => void;
 
+  @Scheme.Action
+  private triggerNewPropertyAction!: () => void;
+
+  @Scheme.Action
+  private triggerNewSchemeAction!: () => void;
+
   @Scheme.Getter("getSchemeList")
   schemeList!: [];
 
@@ -81,32 +112,74 @@ export default class SchemePropertyList extends Vue {
     return this.schemeList;
   }
 
-  getType(value: string): string {
-    return Object.keys(this.typeLib).find((key) => this.typeLib[key] === value);
+  triggerNewProperty(): void {
+    this.triggerNewPropertyAction();
   }
 
-  saveScheme(item: Field): void {
+  addNewProperty(): void {
+    this.addToListAction({
+      key: "",
+      label: "",
+      type: "",
+      validation: {
+        required: false,
+      },
+    });
+  }
+
+  validateScheme(): void {
     this.$v.$touch();
     if (this.$v.$invalid) {
       this.submitStatus = "ERROR";
     } else {
-      this.addToListAction(item);
-      let result = {
-        name: this.schemeName,
-        fields: this.list,
-      };
-      console.log("result: ", result);
-
-      this.saveNewForm(result)
-        .then(() => {
-          this.clearListAction();
-          this.$router.push("/profile");
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      console.log("saveNewScheme");
+      this.triggerNewSchemeAction();
     }
   }
+
+  saveNewScheme(): void {
+    let result = {
+      name: this.schemeName,
+      fields: this.list,
+    };
+    console.log("result: ", result);
+
+    // this.saveNewForm(result)
+    //   .then(() => {
+    //     this.clearListAction();
+    //     this.$router.push("/profile");
+    //   })
+    //   .catch((error) => {
+    //     console.log(error);
+    //   });
+  }
+
+  getType(value: string): string {
+    return Object.keys(this.typeLib).find((key) => this.typeLib[key] === value);
+  }
+
+  // saveScheme(item: Field): void {
+  //   this.$v.$touch();
+  //   if (this.$v.$invalid) {
+  //     this.submitStatus = "ERROR";
+  //   } else {
+  //     this.addToListAction(item);
+  //     let result = {
+  //       name: this.schemeName,
+  //       fields: this.list,
+  //     };
+  //     console.log("result: ", result);
+
+  //     this.saveNewForm(result)
+  //       .then(() => {
+  //         this.clearListAction();
+  //         this.$router.push("/profile");
+  //       })
+  //       .catch((error) => {
+  //         console.log(error);
+  //       });
+  //   }
+  // }
 }
 </script>
 
@@ -160,5 +233,12 @@ export default class SchemePropertyList extends Vue {
       opacity: 0.6;
     }
   }
+}
+
+.property__buttons {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>
