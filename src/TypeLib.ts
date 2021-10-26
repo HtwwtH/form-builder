@@ -1,4 +1,4 @@
-export const TypeLib = {
+export const TypeLib: { [key: string]: string } = {
   "Текстовое поле": "string",
   "Числовое поле": "number",
   Пароль: "password",

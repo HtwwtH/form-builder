@@ -153,3 +153,8 @@ input:focus:invalid,
       color: rgba(235, 87, 87, 0.6);
     }
   }
+
+  // remove button {
+    .added-property__remove {
+      padding: 6px;
+    }

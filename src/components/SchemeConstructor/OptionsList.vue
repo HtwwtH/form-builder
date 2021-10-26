@@ -43,14 +43,17 @@ import { OptionField } from "@/Interfaces";
 })
 export default class OptionsList extends Vue {
   @Prop() position!: number;
+  @Prop() options!: OptionField[];
 
-  optionsList: OptionField[] = [
-    {
-      id: new Date().toString(),
-      key: "",
-      value: "",
-    },
-  ];
+  optionsList: OptionField[] = this.options
+    ? this.options
+    : [
+        {
+          id: new Date().toString(),
+          key: "",
+          value: "",
+        },
+      ];
 
   addOption(): void {
     if (

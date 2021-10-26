@@ -20,13 +20,9 @@
     </div>
     <SchemeProperty
       v-if="showDetails"
-      :keyVal="item.key"
-      :labelVal="item.label"
-      :typeFieldVal="item.type"
-      :validateInfo="item.validation"
+      :item="item"
       :position="index"
       @hideInfo="showDetails = !showDetails"
-      v-click-outside="showDetails = false"
     />
   </div>
 </template>
@@ -43,13 +39,16 @@ import { TypeLib } from "@/TypeLib";
   },
 })
 export default class SchemePropertyHeader extends Vue {
-  @Prop() item: Field;
+  @Prop() item!: Field;
   @Prop() index!: number;
   typeLib = TypeLib;
   showDetails = false;
 
-  getType(value: string): string {
-    return Object.keys(this.typeLib).find((key) => this.typeLib[key] === value);
+  getType(value: string | undefined): string | undefined {
+    if (typeof value === undefined || value === "") return "";
+    else {
+      return Object.keys(TypeLib).find((key) => TypeLib[key] === value);
+    }
   }
 }
 </script>
@@ -58,7 +57,7 @@ export default class SchemePropertyHeader extends Vue {
 @import "@/assets/styles/_vars.scss";
 
 .added-property__header {
-  padding: 20px 36px;
+  padding: 20px 20px 20px 36px;
   border-bottom: 1px solid $grayText;
   display: flex;
   justify-content: space-between;

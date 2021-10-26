@@ -52,6 +52,7 @@
 
         <OptionsList
           :position="position"
+          :options="schemeList[position].options"
           v-if="typeLib[typeField] == 'select'"
           @updateOptionsList="updateOptionsList"
         />
@@ -142,6 +143,14 @@
           </div>
         </div>
       </div>
+
+      <button
+        v-if="position != 0"
+        class="added-property__remove"
+        @click="list.splice(position, 1)"
+      >
+        <img src="../../assets/images/icons/delete.svg" alt="" />
+      </button>
     </div>
   </div>
 </template>
@@ -174,10 +183,7 @@ const Scheme = namespace("Scheme");
 })
 export default class SchemeProperty extends Vue {
   @Prop() position!: number;
-  @Prop() keyVal!: string;
-  @Prop() labelVal!: string;
-  @Prop() typeFieldVal!: string;
-  @Prop() validateInfo!: Validity;
+  @Prop() item!: Field;
 
   typeLib = TypeLib;
 
@@ -191,21 +197,21 @@ export default class SchemeProperty extends Vue {
 
   submitStatus = "";
 
-  keyField = this.keyVal;
-  labelField = this.labelVal;
-  typeField = this.getType(this.typeFieldVal);
-  validation: Validity = this.validateInfo;
-  minVal = this.validateInfo.minlength
-    ? this.validateInfo.minlength
-    : this.validateInfo.min
-    ? this.validateInfo.min
+  keyField = this.item.key;
+  labelField = this.item.label;
+  typeField = this.getType(this.item.type);
+  validation: Validity = this.item.validation;
+  minVal = this.item.validation.minlength
+    ? this.item.validation.minlength
+    : this.item.validation.min
+    ? this.item.validation.min
     : null;
-  maxVal = this.validateInfo.maxlength
-    ? this.validateInfo.maxlength
-    : this.validateInfo.max
-    ? this.validateInfo.max
+  maxVal = this.item.validation.maxlength
+    ? this.item.validation.maxlength
+    : this.item.validation.max
+    ? this.item.validation.max
     : null;
-  pattern = this.validateInfo.pattern ? this.validateInfo.pattern : "";
+  pattern = this.item.validation.pattern ? this.item.validation.pattern : "";
 
   getType(value: string): string {
     if (typeof value === undefined || value === "") return "";
@@ -214,23 +220,21 @@ export default class SchemeProperty extends Vue {
     }
   }
 
-  // get isDisabled(): boolean {
-  //   if (this.keyField == "" && this.labelField == "" && this.typeField == "")
-  //     return true;
-  //   else return false;
-  // }
+  @Scheme.Action
+  private setSchemeBtnStatusAction!: (status: boolean) => void;
 
   @Scheme.Action
   private addToListAction!: (item: Field) => void;
 
   @Scheme.Mutation("updateList")
-  private updateList!: ({ item, index }) => void;
+  private updateList!: (data: [Field, number]) => void;
 
   @Scheme.Getter("getSchemeList")
   schemeList!: [];
 
   @Scheme.Getter("getNewPropertyTrigger")
   triggerNewProperty!: false;
+
   @Scheme.Getter("getNewSchemeTrigger")
   triggerNewScheme!: false;
 
@@ -240,19 +244,16 @@ export default class SchemeProperty extends Vue {
 
   @Watch("triggerNewProperty")
   addNewProperty(): void {
-    console.log("try to addNewProperty");
     this.$v.$touch();
     if (this.$v.$invalid) {
       this.submitStatus = "ERROR";
     } else {
-      this.clearProperty();
       this.$emit("addNewProperty");
     }
   }
 
   @Watch("triggerNewScheme")
   addNewScheme(): void {
-    console.log("try to addNewScheme");
     this.$v.$touch();
     if (this.$v.$invalid) {
       this.submitStatus = "ERROR";
@@ -261,9 +262,21 @@ export default class SchemeProperty extends Vue {
     }
   }
 
+  @Watch("position")
+  clearData(): void {
+    this.clearProperty();
+  }
+
   updateListState(index: number): void {
     let obj = this.getProperty();
     this.updateList([obj, index]);
+    if (
+      this.list[0].key != "" &&
+      this.list[0].label != "" &&
+      this.list[0].type != ""
+    )
+      this.setSchemeBtnStatusAction(false);
+    else this.setSchemeBtnStatusAction(true);
   }
 
   updateOptionsList(data: Option[], index: number): void {
@@ -295,7 +308,6 @@ export default class SchemeProperty extends Vue {
     if (this.typeLib[this.typeField] == "select") {
       obj.options = this.optionsList;
     }
-
     return obj;
   }
 
@@ -329,6 +341,13 @@ export default class SchemeProperty extends Vue {
   background: $white;
   padding: 20px 36px 40px;
   margin-bottom: 40px;
+  position: relative;
+}
+
+.added-property__remove {
+  position: absolute;
+  top: 13px;
+  right: 20px;
 }
 
 .scheme-property {

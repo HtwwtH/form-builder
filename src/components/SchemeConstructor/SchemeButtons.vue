@@ -11,7 +11,7 @@
       @click="$emit('validateScheme')"
       type="button"
       class="btn btn--default btn--blue"
-      :disabled="false"
+      :disabled="saveBtnStatus"
     >
       Сохранить схему
     </button>
@@ -19,12 +19,19 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue, Prop } from "vue-property-decorator";
+import { namespace } from "vuex-class";
+const Scheme = namespace("Scheme");
 
 @Component({
   components: {},
 })
-export default class SchemeButtons extends Vue {}
+export default class SchemeButtons extends Vue {
+  @Prop() saveDisabled!: boolean;
+
+  @Scheme.Getter("getSaveBtnStatus")
+  saveBtnStatus!: boolean;
+}
 </script>
 
 <style scoped lang="scss">

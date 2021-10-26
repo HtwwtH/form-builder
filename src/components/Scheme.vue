@@ -1,7 +1,6 @@
 <template>
   <form @submit.prevent="onSubmit" class="scheme">
-    <div v-if="loading" class="">Loading...</div>
-    <div v-else class="scheme__wrapper">
+    <div class="scheme__wrapper">
       <h2 class="title">{{ schemeName }}</h2>
 
       <div
@@ -51,7 +50,6 @@ interface UserInput {
   },
 })
 export default class Scheme extends Vue {
-  loading = false;
   schemeName = "";
   fields: Field[] = [];
   @Provide() userData: UserInput[] = [];
@@ -65,7 +63,6 @@ export default class Scheme extends Vue {
   private fetchSingleForm!: (id: string) => Promise<any>;
 
   mounted(): void {
-    this.loading = true;
     const id = this.$route.params.id;
     this.fetchSingleForm(id)
       .then(() => {
@@ -79,10 +76,8 @@ export default class Scheme extends Vue {
             invalid: false,
           })
         );
-        this.loading = false;
       })
       .catch((error) => {
-        this.loading = false;
         console.log(error);
       });
   }

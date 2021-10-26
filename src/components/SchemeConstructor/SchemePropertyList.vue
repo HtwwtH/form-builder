@@ -13,10 +13,7 @@
       />
 
       <SchemeProperty
-        :keyVal="item.key"
-        :labelVal="item.label"
-        :typeFieldVal="item.type"
-        :validateInfo="item.validation"
+        :item="item"
         v-if="index == list.length - 1"
         @saveNewScheme="saveNewScheme"
         @addNewProperty="addNewProperty"
@@ -25,14 +22,14 @@
     </div>
 
     <SchemeButtons
-      @triggerNewProperty="triggerNewProperty"
+      @triggerNewProperty="triggerNewPropertyAction"
       @validateScheme="validateScheme"
     />
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue, Watch } from "vue-property-decorator";
 import { namespace } from "vuex-class";
 const Form = namespace("Form");
 const Scheme = namespace("Scheme");
@@ -81,10 +78,6 @@ export default class SchemePropertyList extends Vue {
     return this.schemeList;
   }
 
-  triggerNewProperty(): void {
-    this.triggerNewPropertyAction();
-  }
-
   addNewProperty(): void {
     this.addToListAction({
       key: "",
@@ -120,16 +113,15 @@ export default class SchemePropertyList extends Vue {
       name: this.schemeName,
       fields: this.list,
     };
-    console.log("result: ", result);
 
-    // this.saveNewForm(result)
-    //   .then(() => {
-    //     this.clearListAction();
-    //     this.$router.push("/profile");
-    //   })
-    //   .catch((error) => {
-    //     console.log(error);
-    //   });
+    this.saveNewForm(result)
+      .then(() => {
+        this.clearListAction();
+        this.$router.push("/profile");
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
 }
 </script>

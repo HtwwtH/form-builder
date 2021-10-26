@@ -25,14 +25,9 @@ export default class FormList extends Vue {
   private fetchForms!: () => Promise<any>;
 
   created(): void {
-    this.fetchForms()
-      .then(() => {
-        console.log("fetched Forms on create");
-        console.log("this.getFormList ", this.getFormList);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    this.fetchForms().catch((error) => {
+      console.log(error);
+    });
   }
 }
 </script>

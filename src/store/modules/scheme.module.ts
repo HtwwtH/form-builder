@@ -3,6 +3,7 @@ import { Field } from '@/Interfaces'
 @Module({ namespaced: true, stateFactory: true })
 class Scheme extends VuexModule {
   public schemeName = ''
+  public saveBtnStatus = true
   public schemeList: Field[] = [
     {
       key: '',
@@ -23,6 +24,11 @@ class Scheme extends VuexModule {
   }
 
   @Mutation
+  public setSchemeBtnStatus(status: boolean): void {
+    this.saveBtnStatus = status;
+  }
+
+  @Mutation
   public addToList(item: Field): void {
     this.schemeList.push(item);
   }
@@ -40,7 +46,17 @@ class Scheme extends VuexModule {
 
   @Mutation
   public clearList(): void {
-    this.schemeList = [];
+    this.schemeName = ''
+    this.schemeList = [
+      {
+        key: '',
+        label: '',
+        type: '',
+        validation: {
+          required: false,
+        },
+      }
+    ];
   }
 
   @Mutation
@@ -56,6 +72,11 @@ class Scheme extends VuexModule {
   @Action
   setSchemeNameAction(name: string): void {
     this.context.commit('setSchemeName', name);
+  }
+
+  @Action
+  setSchemeBtnStatusAction(status: boolean): void {
+    this.context.commit('setSchemeBtnStatus', status);
   }
 
   @Action
@@ -94,6 +115,10 @@ class Scheme extends VuexModule {
 
   get getSchemeName(): string {
     return this.schemeName;
+  }
+
+  get getSaveBtnStatus(): boolean {
+    return this.saveBtnStatus;
   }
 
   get getNewPropertyTrigger(): boolean {
