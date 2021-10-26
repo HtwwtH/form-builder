@@ -87,24 +87,7 @@ export default class Scheme extends Vue {
       });
   }
 
-  // setStatus(): void {
-  //   if (
-  //     this.userData.filter((item) => item.required && item.userValue === "")
-  //       .length == 0
-  //   )
-  //     this.validationSuccess = true;
-  //   else this.validationError = true;
-  // }
-
   onSubmit(): void {
-    // this.validationSuccess = false;
-    // this.validationError = false;
-    // this.userData.forEach((item) => {
-    //   if (item.required && item.userValue === "") {
-    //     item.invalid = true;
-    //   }
-    // });
-    // this.setStatus();
     this.validationError = false;
     this.validationSuccess = true;
   }

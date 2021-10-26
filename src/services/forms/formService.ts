@@ -28,7 +28,6 @@ class FormService {
   }
 
   async saveNewForm(schema: Schema) {
-    console.log(schema)
     return axios
       .post(API_FORM, { schema: schema }, { headers: authHeader() })
       .then(response => {

@@ -9,10 +9,10 @@
         />
         <button
           v-if="optionsList.length > 1"
-          @click="optionsList.splice(index, 1)"
+          @click="removeOption(index)"
           class="remove-btn"
         >
-          <img src="../assets/images/icons/cross-lines.svg" alt="" />
+          <img src="../../assets/images/icons/cross-lines.svg" alt="" />
         </button>
       </div>
       <div class="option__key">
@@ -20,11 +20,11 @@
           type="text"
           placeholder="ключ опции"
           v-model="optionsList[index].key"
-          @change="checkUnique(optionsList[index].key)"
+          @change="updateOptions()"
           :class="{ invalid: checkUnique(optionsList[index].key) == false }"
         />
         <label>Такой ключ уже существует</label>
-        <img src="../assets/images/icons/alert-circle.svg" alt="" />
+        <img src="../../assets/images/icons/alert-circle.svg" alt="" />
       </div>
     </div>
 
@@ -35,13 +35,15 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue, Prop } from "vue-property-decorator";
 import { OptionField } from "@/Interfaces";
 
 @Component({
   components: {},
 })
 export default class OptionsList extends Vue {
+  @Prop() position!: number;
+
   optionsList: OptionField[] = [
     {
       id: new Date().toString(),
@@ -60,8 +62,16 @@ export default class OptionsList extends Vue {
         key: "",
         value: "",
       });
-      this.$emit("updateOptionsList", this.optionsList);
     }
+  }
+
+  updateOptions(): void {
+    this.$emit("updateOptionsList", this.optionsList, this.position);
+  }
+
+  removeOption(index: number): void {
+    this.optionsList.splice(index, 1);
+    this.$emit("updateOptionsList", this.optionsList, this.position);
   }
 
   checkUnique(key: string): boolean {

@@ -2,7 +2,9 @@
   <div class="">
     <div class="property__content">
       <div class="scheme-property">
-        <h4>Свойство {{ position + 1 }}: {{ labelField }}</h4>
+        <h4 @click="$emit('hideInfo')">
+          Свойство {{ position + 1 }}: {{ labelField }}
+        </h4>
         <div class="field" :class="{ invalid: $v.keyField.$error }">
           <label for="keyInput"
             ><span class="asterisk">*</span>Ключ свойства</label
@@ -12,7 +14,6 @@
             v-model="keyField"
             type="text"
             placeholder="Укажите ключ свойства"
-            required
             @change="updateListState(position)"
           />
         </div>
@@ -25,7 +26,6 @@
             v-model="labelField"
             type="text"
             placeholder="Укажите название свойства"
-            required
             @change="updateListState(position)"
           />
         </div>
@@ -36,11 +36,7 @@
           <select
             id="typeInput"
             v-model="typeField"
-            required
-            @change="
-              validateVisible = true;
-              updateListState(position);
-            "
+            @change="updateListState(position)"
           >
             <option value="" disabled selected hidden>
               Выберите поле для отображения
@@ -55,12 +51,13 @@
         </div>
 
         <OptionsList
+          :position="position"
           v-if="typeLib[typeField] == 'select'"
           @updateOptionsList="updateOptionsList"
         />
       </div>
 
-      <div v-if="validateVisible" class="scheme-validity">
+      <div v-if="typeLib[typeField]" class="scheme-validity">
         <h4>Валидация</h4>
 
         <div class="scheme-validity__toggle">
@@ -69,6 +66,7 @@
             type="checkbox"
             id="toggle-button"
             class="toggle-button"
+            @change="updateListState(position)"
           />
           <label for="toggle-button" class="text"
             >Обязательно для заполнения</label
@@ -100,6 +98,7 @@
               v-model="minVal"
               type="number"
               placeholder=""
+              @change="updateListState(position)"
             />
           </div>
           <div class="field">
@@ -119,6 +118,7 @@
               v-model="maxVal"
               type="number"
               placeholder=""
+              @change="updateListState(position)"
             />
           </div>
         </div>
@@ -137,6 +137,7 @@
               v-model="pattern"
               type="text"
               placeholder=""
+              @change="updateListState(position)"
             />
           </div>
         </div>
@@ -146,14 +147,16 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Inject, Watch } from "vue-property-decorator";
+import { Component, Vue, Prop, Watch } from "vue-property-decorator";
 import { required } from "vuelidate/lib/validators";
 import { namespace } from "vuex-class";
-import OptionsList from "@/components/OptionsList.vue";
+import OptionsList from "@/components/SchemeConstructor/OptionsList.vue";
 import { Validity, Option, Field } from "@/Interfaces";
+import { TypeLib } from "@/TypeLib";
 const Scheme = namespace("Scheme");
 
 @Component({
+  name: "SchemeProperty",
   components: {
     OptionsList,
   },
@@ -171,7 +174,12 @@ const Scheme = namespace("Scheme");
 })
 export default class SchemeProperty extends Vue {
   @Prop() position!: number;
-  @Inject() readonly typeLib;
+  @Prop() keyVal!: string;
+  @Prop() labelVal!: string;
+  @Prop() typeFieldVal!: string;
+  @Prop() validateInfo!: Validity;
+
+  typeLib = TypeLib;
 
   optionsList: Option[] = [
     {
@@ -183,17 +191,28 @@ export default class SchemeProperty extends Vue {
 
   submitStatus = "";
 
-  validateVisible = false;
+  keyField = this.keyVal;
+  labelField = this.labelVal;
+  typeField = this.getType(this.typeFieldVal);
+  validation: Validity = this.validateInfo;
+  minVal = this.validateInfo.minlength
+    ? this.validateInfo.minlength
+    : this.validateInfo.min
+    ? this.validateInfo.min
+    : null;
+  maxVal = this.validateInfo.maxlength
+    ? this.validateInfo.maxlength
+    : this.validateInfo.max
+    ? this.validateInfo.max
+    : null;
+  pattern = this.validateInfo.pattern ? this.validateInfo.pattern : "";
 
-  keyField = "";
-  labelField = "";
-  typeField = "";
-  validation: Validity = {
-    required: false,
-  };
-  minVal = null;
-  maxVal = null;
-  pattern = "";
+  getType(value: string): string {
+    if (typeof value === undefined || value === "") return "";
+    else {
+      return Object.keys(TypeLib).find((key) => TypeLib[key] === value);
+    }
+  }
 
   // get isDisabled(): boolean {
   //   if (this.keyField == "" && this.labelField == "" && this.typeField == "")
@@ -244,12 +263,12 @@ export default class SchemeProperty extends Vue {
 
   updateListState(index: number): void {
     let obj = this.getProperty();
-    console.log("aggregated ", obj);
     this.updateList([obj, index]);
   }
 
-  updateOptionsList(data: Option[]): void {
+  updateOptionsList(data: Option[], index: number): void {
     this.optionsList = data;
+    this.updateListState(index);
   }
 
   getProperty(): Field {
@@ -299,22 +318,6 @@ export default class SchemeProperty extends Vue {
     ];
     this.$v.$reset();
   }
-
-  // createProperty(): void {
-  //   let obj = this.getProperty();
-  //   this.clearProperty();
-  //   this.addToListAction(obj);
-  // }
-
-  // saveNewScheme(): void {
-  //   this.$v.$touch();
-  //   if (this.$v.$invalid) {
-  //     this.submitStatus = "ERROR";
-  //   } else {
-  //     let obj = this.getProperty();
-  //     this.$emit("saveScheme", obj);
-  //   }
-  // }
 }
 </script>
 
@@ -332,6 +335,7 @@ export default class SchemeProperty extends Vue {
   width: 44%;
 
   h4 {
+    cursor: pointer;
     margin-bottom: 20px;
     position: relative;
 
@@ -339,7 +343,7 @@ export default class SchemeProperty extends Vue {
       position: absolute;
       left: -19px;
       top: -4px;
-      content: url("../assets/images/icons/select-dropdown.svg");
+      content: url("../../assets/images/icons/select-dropdown.svg");
     }
   }
 }

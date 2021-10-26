@@ -8,7 +8,6 @@ class Form extends VuexModule {
 
   @Mutation
   public setList(list: Schema[]): void {
-    console.log('set ', list)
     this.formList = list;
   }
 
@@ -21,7 +20,6 @@ class Form extends VuexModule {
   fetchForms(): Promise<any> {
     return FormService.fetchForms().then(
       list => {
-        console.log(list)
         this.context.commit('setList', list);
         return Promise.resolve(list);
       },
@@ -39,7 +37,6 @@ class Form extends VuexModule {
   fetchSingleForm(id: string): Promise<any> {
     return FormService.fetchSingleForm(id).then(
       item => {
-        console.log(item);
         this.context.commit('setCurrentForm', item);
         return Promise.resolve(item);
       },
@@ -57,7 +54,6 @@ class Form extends VuexModule {
   saveNewForm(schema: Schema): Promise<any> {
     return FormService.saveNewForm(schema).then(
       () => {
-        console.log('saved schema: ', schema);
         return Promise.resolve(schema);
       },
       error => {
