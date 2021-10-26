@@ -72,7 +72,7 @@ export default class SchemePropertyList extends Vue {
   schemeList!: [];
 
   @Scheme.Getter("getSchemeName")
-  schemeName!: [];
+  schemeName!: string;
 
   get list(): Field[] {
     return this.schemeList;

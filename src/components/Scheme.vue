@@ -1,6 +1,7 @@
 <template>
-  <form @submit.prevent="onSubmit" class="scheme">
-    <div class="scheme__wrapper">
+  <form @submit.prevent="onSubmit2" class="scheme">
+    <div v-if="loading" class="">Loading...</div>
+    <div v-else class="scheme__wrapper">
       <h2 class="title">{{ schemeName }}</h2>
 
       <div
@@ -12,11 +13,7 @@
         <InputField :item="item" :i="i" />
       </div>
 
-      <button
-        @click="validationError = true"
-        type="submit"
-        class="btn btn--wide btn--blue"
-      >
+      <button @click="onSubmit" type="button" class="btn btn--wide btn--blue">
         Валидация
       </button>
 
@@ -39,7 +36,6 @@ const Form = namespace("Form");
 
 interface UserInput {
   name: string;
-  required: boolean;
   userValue: string;
   invalid: boolean;
 }
@@ -50,6 +46,7 @@ interface UserInput {
   },
 })
 export default class Scheme extends Vue {
+  loading = false;
   schemeName = "";
   fields: Field[] = [];
   @Provide() userData: UserInput[] = [];
@@ -63,6 +60,7 @@ export default class Scheme extends Vue {
   private fetchSingleForm!: (id: string) => Promise<any>;
 
   mounted(): void {
+    this.loading = true;
     const id = this.$route.params.id;
     this.fetchSingleForm(id)
       .then(() => {
@@ -71,20 +69,63 @@ export default class Scheme extends Vue {
         this.fields.forEach((item) =>
           this.userData.push({
             name: item.label,
-            required: item.validation.required,
             userValue: "",
             invalid: false,
           })
         );
+        this.loading = false;
       })
       .catch((error) => {
+        this.loading = false;
         console.log(error);
       });
   }
 
   onSubmit(): void {
     this.validationError = false;
-    this.validationSuccess = true;
+    this.validationSuccess = false;
+    this.customValidate();
+    let errorCounter = this.userData.filter((item) => item.invalid).length;
+    errorCounter > 0
+      ? (this.validationError = true)
+      : (this.validationSuccess = true);
+  }
+
+  customValidate(): void {
+    let rules = this.fields.map((item) => {
+      return item.validation;
+    });
+    rules.forEach((item, i) => {
+      if (item.required === true) {
+        this.userData[i].userValue == ""
+          ? (this.userData[i].invalid = true)
+          : {};
+      }
+      if (item.required && item.minlength) {
+        this.userData[i].userValue.length < item.minlength
+          ? (this.userData[i].invalid = true)
+          : {};
+      }
+      if (item.required && item.maxlength) {
+        this.userData[i].userValue.length > item.maxlength
+          ? (this.userData[i].invalid = true)
+          : {};
+      }
+      if (item.required && item.min) {
+        parseInt(this.userData[i].userValue) < item.min
+          ? (this.userData[i].invalid = true)
+          : {};
+      }
+      if (item.required && item.max) {
+        parseInt(this.userData[i].userValue) > item.max
+          ? (this.userData[i].invalid = true)
+          : {};
+      }
+      if (item.required && item.pattern) {
+        if (!this.userData[i].userValue.match("/" + item.pattern + "/"))
+          this.userData[i].invalid = true;
+      }
+    });
   }
 }
 </script>
