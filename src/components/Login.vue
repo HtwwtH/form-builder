@@ -15,7 +15,6 @@
             class="input"
             name="username"
             placeholder="Login"
-            required
           />
         </div>
       </div>
@@ -28,7 +27,6 @@
             class="input"
             name="username"
             placeholder="Password"
-            required
           />
           <button
             type="button"

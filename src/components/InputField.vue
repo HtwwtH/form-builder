@@ -16,7 +16,6 @@
     <label v-else-if="item.type == 'checkbox'" class="custom-checkbox">
       <input
         :type="item.type"
-        :required="item.validation.required"
         v-model="userData[i].userValue"
         @input="userData[i].invalid = false"
       />
@@ -28,7 +27,6 @@
       :type="item.type"
       :placeholder="'Введите ' + item.label"
       :pattern="item.validation.pattern"
-      :required="item.validation.required"
       :min="item.validation.min"
       :max="item.validation.max"
       :minlength="item.validation.minlength"

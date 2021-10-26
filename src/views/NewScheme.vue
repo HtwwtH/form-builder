@@ -10,7 +10,7 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import { namespace } from "vuex-class";
-import SchemePropertyList from "@/components/SchemePropertyList.vue";
+import SchemePropertyList from "@/components/SchemeConstructor/SchemePropertyList.vue";
 const Auth = namespace("Auth");
 
 @Component({

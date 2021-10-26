@@ -2,6 +2,8 @@ import { VuexModule, Module, Mutation, Action } from 'vuex-module-decorators';
 import { Field } from '@/Interfaces'
 @Module({ namespaced: true, stateFactory: true })
 class Scheme extends VuexModule {
+  public schemeName = ''
+  public saveBtnStatus = true
   public schemeList: Field[] = [
     {
       key: '',
@@ -17,9 +19,23 @@ class Scheme extends VuexModule {
   public triggerNewScheme = false;
 
   @Mutation
+  public setSchemeName(name: string): void {
+    this.schemeName = name;
+  }
+
+  @Mutation
+  public setSchemeBtnStatus(status: boolean): void {
+    this.saveBtnStatus = status;
+  }
+
+  @Mutation
   public addToList(item: Field): void {
-    console.log("add item to store list: ", item);
     this.schemeList.push(item);
+  }
+
+  @Mutation
+  public removeFromList(index: number): void {
+    this.schemeList.splice(index, 1);
   }
 
   @Mutation
@@ -30,7 +46,17 @@ class Scheme extends VuexModule {
 
   @Mutation
   public clearList(): void {
-    this.schemeList = [];
+    this.schemeName = ''
+    this.schemeList = [
+      {
+        key: '',
+        label: '',
+        type: '',
+        validation: {
+          required: false,
+        },
+      }
+    ];
   }
 
   @Mutation
@@ -44,8 +70,23 @@ class Scheme extends VuexModule {
   }
 
   @Action
+  setSchemeNameAction(name: string): void {
+    this.context.commit('setSchemeName', name);
+  }
+
+  @Action
+  setSchemeBtnStatusAction(status: boolean): void {
+    this.context.commit('setSchemeBtnStatus', status);
+  }
+
+  @Action
   addToListAction(item: Scheme): void {
     this.context.commit('addToList', item);
+  }
+
+  @Action
+  removeFromListAction(index: number): void {
+    this.context.commit('removeFromList', index);
   }
 
   @Action
@@ -70,6 +111,14 @@ class Scheme extends VuexModule {
 
   get getSchemeList(): Field[] {
     return this.schemeList;
+  }
+
+  get getSchemeName(): string {
+    return this.schemeName;
+  }
+
+  get getSaveBtnStatus(): boolean {
+    return this.saveBtnStatus;
   }
 
   get getNewPropertyTrigger(): boolean {

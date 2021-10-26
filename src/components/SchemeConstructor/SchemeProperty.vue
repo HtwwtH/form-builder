@@ -2,7 +2,9 @@
   <div class="">
     <div class="property__content">
       <div class="scheme-property">
-        <h4>Свойство {{ position + 1 }}: {{ labelField }}</h4>
+        <h4 @click="$emit('hideInfo')">
+          Свойство {{ position + 1 }}: {{ labelField }}
+        </h4>
         <div class="field" :class="{ invalid: $v.keyField.$error }">
           <label for="keyInput"
             ><span class="asterisk">*</span>Ключ свойства</label
@@ -12,7 +14,6 @@
             v-model="keyField"
             type="text"
             placeholder="Укажите ключ свойства"
-            required
             @change="updateListState(position)"
           />
         </div>
@@ -25,7 +26,6 @@
             v-model="labelField"
             type="text"
             placeholder="Укажите название свойства"
-            required
             @change="updateListState(position)"
           />
         </div>
@@ -36,11 +36,7 @@
           <select
             id="typeInput"
             v-model="typeField"
-            required
-            @change="
-              validateVisible = true;
-              updateListState(position);
-            "
+            @change="updateListState(position)"
           >
             <option value="" disabled selected hidden>
               Выберите поле для отображения
@@ -55,12 +51,14 @@
         </div>
 
         <OptionsList
+          :position="position"
+          :options="schemeList[position].options"
           v-if="typeLib[typeField] == 'select'"
           @updateOptionsList="updateOptionsList"
         />
       </div>
 
-      <div v-if="validateVisible" class="scheme-validity">
+      <div v-if="typeLib[typeField]" class="scheme-validity">
         <h4>Валидация</h4>
 
         <div class="scheme-validity__toggle">
@@ -69,6 +67,7 @@
             type="checkbox"
             id="toggle-button"
             class="toggle-button"
+            @change="updateListState(position)"
           />
           <label for="toggle-button" class="text"
             >Обязательно для заполнения</label
@@ -100,6 +99,7 @@
               v-model="minVal"
               type="number"
               placeholder=""
+              @change="updateListState(position)"
             />
           </div>
           <div class="field">
@@ -119,6 +119,7 @@
               v-model="maxVal"
               type="number"
               placeholder=""
+              @change="updateListState(position)"
             />
           </div>
         </div>
@@ -137,23 +138,34 @@
               v-model="pattern"
               type="text"
               placeholder=""
+              @change="updateListState(position)"
             />
           </div>
         </div>
       </div>
+
+      <button
+        v-if="position != 0"
+        class="added-property__remove"
+        @click="list.splice(position, 1)"
+      >
+        <img src="../../assets/images/icons/delete.svg" alt="" />
+      </button>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Prop, Inject, Watch } from "vue-property-decorator";
+import { Component, Vue, Prop, Watch } from "vue-property-decorator";
 import { required } from "vuelidate/lib/validators";
 import { namespace } from "vuex-class";
-import OptionsList from "@/components/OptionsList.vue";
+import OptionsList from "@/components/SchemeConstructor/OptionsList.vue";
 import { Validity, Option, Field } from "@/Interfaces";
+import { TypeLib } from "@/TypeLib";
 const Scheme = namespace("Scheme");
 
 @Component({
+  name: "SchemeProperty",
   components: {
     OptionsList,
   },
@@ -171,7 +183,9 @@ const Scheme = namespace("Scheme");
 })
 export default class SchemeProperty extends Vue {
   @Prop() position!: number;
-  @Inject() readonly typeLib;
+  @Prop() item!: Field;
+
+  typeLib = TypeLib;
 
   optionsList: Option[] = [
     {
@@ -183,35 +197,44 @@ export default class SchemeProperty extends Vue {
 
   submitStatus = "";
 
-  validateVisible = false;
+  keyField = this.item.key;
+  labelField = this.item.label;
+  typeField = this.getType(this.item.type);
+  validation: Validity = this.item.validation;
+  minVal = this.item.validation.minlength
+    ? this.item.validation.minlength
+    : this.item.validation.min
+    ? this.item.validation.min
+    : null;
+  maxVal = this.item.validation.maxlength
+    ? this.item.validation.maxlength
+    : this.item.validation.max
+    ? this.item.validation.max
+    : null;
+  pattern = this.item.validation.pattern ? this.item.validation.pattern : "";
 
-  keyField = "";
-  labelField = "";
-  typeField = "";
-  validation: Validity = {
-    required: false,
-  };
-  minVal = null;
-  maxVal = null;
-  pattern = "";
+  getType(value: string): string {
+    if (typeof value === undefined || value === "") return "";
+    else {
+      return Object.keys(TypeLib).find((key) => TypeLib[key] === value);
+    }
+  }
 
-  // get isDisabled(): boolean {
-  //   if (this.keyField == "" && this.labelField == "" && this.typeField == "")
-  //     return true;
-  //   else return false;
-  // }
+  @Scheme.Action
+  private setSchemeBtnStatusAction!: (status: boolean) => void;
 
   @Scheme.Action
   private addToListAction!: (item: Field) => void;
 
   @Scheme.Mutation("updateList")
-  private updateList!: ({ item, index }) => void;
+  private updateList!: (data: [Field, number]) => void;
 
   @Scheme.Getter("getSchemeList")
   schemeList!: [];
 
   @Scheme.Getter("getNewPropertyTrigger")
   triggerNewProperty!: false;
+
   @Scheme.Getter("getNewSchemeTrigger")
   triggerNewScheme!: false;
 
@@ -221,19 +244,16 @@ export default class SchemeProperty extends Vue {
 
   @Watch("triggerNewProperty")
   addNewProperty(): void {
-    console.log("try to addNewProperty");
     this.$v.$touch();
     if (this.$v.$invalid) {
       this.submitStatus = "ERROR";
     } else {
-      this.clearProperty();
       this.$emit("addNewProperty");
     }
   }
 
   @Watch("triggerNewScheme")
   addNewScheme(): void {
-    console.log("try to addNewScheme");
     this.$v.$touch();
     if (this.$v.$invalid) {
       this.submitStatus = "ERROR";
@@ -242,14 +262,26 @@ export default class SchemeProperty extends Vue {
     }
   }
 
-  updateListState(index: number): void {
-    let obj = this.getProperty();
-    console.log("aggregated ", obj);
-    this.updateList([obj, index]);
+  @Watch("position")
+  clearData(): void {
+    this.clearProperty();
   }
 
-  updateOptionsList(data: Option[]): void {
+  updateListState(index: number): void {
+    let obj = this.getProperty();
+    this.updateList([obj, index]);
+    if (
+      this.list[0].key != "" &&
+      this.list[0].label != "" &&
+      this.list[0].type != ""
+    )
+      this.setSchemeBtnStatusAction(false);
+    else this.setSchemeBtnStatusAction(true);
+  }
+
+  updateOptionsList(data: Option[], index: number): void {
     this.optionsList = data;
+    this.updateListState(index);
   }
 
   getProperty(): Field {
@@ -276,7 +308,6 @@ export default class SchemeProperty extends Vue {
     if (this.typeLib[this.typeField] == "select") {
       obj.options = this.optionsList;
     }
-
     return obj;
   }
 
@@ -299,22 +330,6 @@ export default class SchemeProperty extends Vue {
     ];
     this.$v.$reset();
   }
-
-  // createProperty(): void {
-  //   let obj = this.getProperty();
-  //   this.clearProperty();
-  //   this.addToListAction(obj);
-  // }
-
-  // saveNewScheme(): void {
-  //   this.$v.$touch();
-  //   if (this.$v.$invalid) {
-  //     this.submitStatus = "ERROR";
-  //   } else {
-  //     let obj = this.getProperty();
-  //     this.$emit("saveScheme", obj);
-  //   }
-  // }
 }
 </script>
 
@@ -326,12 +341,20 @@ export default class SchemeProperty extends Vue {
   background: $white;
   padding: 20px 36px 40px;
   margin-bottom: 40px;
+  position: relative;
+}
+
+.added-property__remove {
+  position: absolute;
+  top: 13px;
+  right: 20px;
 }
 
 .scheme-property {
   width: 44%;
 
   h4 {
+    cursor: pointer;
     margin-bottom: 20px;
     position: relative;
 
@@ -339,7 +362,7 @@ export default class SchemeProperty extends Vue {
       position: absolute;
       left: -19px;
       top: -4px;
-      content: url("../assets/images/icons/select-dropdown.svg");
+      content: url("../../assets/images/icons/select-dropdown.svg");
     }
   }
 }
