@@ -1,24 +1,27 @@
-# 21.10.18_form-builder
+# Form-builder
 
 ## Project setup
 ```
-yarn install
+yarn install | npm install
 ```
 
 ### Compiles and hot-reloads for development
 ```
-yarn serve
+yarn serve | npm run serve
 ```
 
 ### Compiles and minifies for production
 ```
-yarn build
+yarn build | npm run build
 ```
 
 ### Lints and fixes files
 ```
-yarn lint
+yarn lint | npm run lint
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### Test
+```
+yarn test:unit | npm run test:unit
+```
+

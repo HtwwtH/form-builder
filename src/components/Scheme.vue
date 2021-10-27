@@ -31,14 +31,9 @@
 import { Component, Vue, Provide } from "vue-property-decorator";
 import { namespace } from "vuex-class";
 import InputField from "@/components/InputField.vue";
-import { Field } from "@/Interfaces";
+import { Field, UserInput } from "@/Interfaces";
+import FormService from "@/services/forms/formService";
 const Form = namespace("Form");
-
-interface UserInput {
-  name: string;
-  userValue: string;
-  invalid: boolean;
-}
 
 @Component({
   components: {
@@ -49,9 +44,9 @@ export default class Scheme extends Vue {
   loading = false;
   schemeName = "";
   fields: Field[] = [];
-  @Provide() userData: UserInput[] = [];
   validationError = false;
   validationSuccess = false;
+  @Provide() userData: UserInput[] = [];
 
   @Form.Getter("getCurrentForm")
   getCurrentForm!: { id: number; schema: { name: string; fields: [] } };
@@ -84,46 +79,11 @@ export default class Scheme extends Vue {
   onSubmit(): void {
     this.validationError = false;
     this.validationSuccess = false;
-    this.customValidate(this.fields, this.userData);
+    this.userData = FormService.customValidate(this.fields, this.userData);
     let errorCounter = this.userData.filter((item) => item.invalid).length;
     errorCounter > 0
       ? (this.validationError = true)
       : (this.validationSuccess = true);
-  }
-
-  customValidate(fields: Field[], userData: UserInput[]): void {
-    let rules = fields.map((item) => {
-      return item.validation;
-    });
-    rules.forEach((item, i) => {
-      if (item.required === true) {
-        userData[i].userValue == "" ? (userData[i].invalid = true) : {};
-      }
-      if (item.required && item.minlength) {
-        userData[i].userValue.length < item.minlength
-          ? (userData[i].invalid = true)
-          : {};
-      }
-      if (item.required && item.maxlength) {
-        userData[i].userValue.length > item.maxlength
-          ? (userData[i].invalid = true)
-          : {};
-      }
-      if (item.required && item.min) {
-        parseInt(userData[i].userValue) < item.min
-          ? (userData[i].invalid = true)
-          : {};
-      }
-      if (item.required && item.max) {
-        parseInt(userData[i].userValue) > item.max
-          ? (userData[i].invalid = true)
-          : {};
-      }
-      if (item.required && item.pattern) {
-        if (!userData[i].userValue.match("/" + item.pattern + "/"))
-          userData[i].invalid = true;
-      }
-    });
   }
 }
 </script>

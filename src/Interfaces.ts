@@ -40,3 +40,9 @@ export interface Schema {
   name: string,
   fields: Field[]
 }
+
+export interface UserInput {
+  name: string;
+  userValue: string;
+  invalid: boolean;
+}
