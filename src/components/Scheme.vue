@@ -84,46 +84,44 @@ export default class Scheme extends Vue {
   onSubmit(): void {
     this.validationError = false;
     this.validationSuccess = false;
-    this.customValidate();
+    this.customValidate(this.fields, this.userData);
     let errorCounter = this.userData.filter((item) => item.invalid).length;
     errorCounter > 0
       ? (this.validationError = true)
       : (this.validationSuccess = true);
   }
 
-  customValidate(): void {
-    let rules = this.fields.map((item) => {
+  customValidate(fields: Field[], userData: UserInput[]): void {
+    let rules = fields.map((item) => {
       return item.validation;
     });
     rules.forEach((item, i) => {
       if (item.required === true) {
-        this.userData[i].userValue == ""
-          ? (this.userData[i].invalid = true)
-          : {};
+        userData[i].userValue == "" ? (userData[i].invalid = true) : {};
       }
       if (item.required && item.minlength) {
-        this.userData[i].userValue.length < item.minlength
-          ? (this.userData[i].invalid = true)
+        userData[i].userValue.length < item.minlength
+          ? (userData[i].invalid = true)
           : {};
       }
       if (item.required && item.maxlength) {
-        this.userData[i].userValue.length > item.maxlength
-          ? (this.userData[i].invalid = true)
+        userData[i].userValue.length > item.maxlength
+          ? (userData[i].invalid = true)
           : {};
       }
       if (item.required && item.min) {
-        parseInt(this.userData[i].userValue) < item.min
-          ? (this.userData[i].invalid = true)
+        parseInt(userData[i].userValue) < item.min
+          ? (userData[i].invalid = true)
           : {};
       }
       if (item.required && item.max) {
-        parseInt(this.userData[i].userValue) > item.max
-          ? (this.userData[i].invalid = true)
+        parseInt(userData[i].userValue) > item.max
+          ? (userData[i].invalid = true)
           : {};
       }
       if (item.required && item.pattern) {
-        if (!this.userData[i].userValue.match("/" + item.pattern + "/"))
-          this.userData[i].invalid = true;
+        if (!userData[i].userValue.match("/" + item.pattern + "/"))
+          userData[i].invalid = true;
       }
     });
   }

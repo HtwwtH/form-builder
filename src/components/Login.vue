@@ -83,10 +83,14 @@ export default class Login extends Vue {
     password: string;
   }) => Promise<any>;
 
-  created(): void {
+  isLogged(): void {
     if (this.isLoggedIn) {
       this.$router.push("/profile");
     }
+  }
+
+  created(): void {
+    this.isLogged();
   }
 
   handleLogin(): void {
